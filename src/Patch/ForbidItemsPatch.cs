@@ -8,7 +8,7 @@ namespace MoMEssentials.Patch;
 [HarmonyPatch]
 public class ForbidItemsPatch
 {
-    private static ScenarioVariant SelectedScenarioVariant;
+    private static ScenarioVariant _selectedScenarioVariant;
 
     [HarmonyPatch(typeof(SetupViewController), nameof(SetupViewController.CoroutineContinueFromInvestigator))]
     [HarmonyPrefix]
@@ -18,9 +18,14 @@ public class ForbidItemsPatch
         if (scenarioVariant == null || scenarioVariant.name == "Random Variant")
         {
             // Select a variant now so it will be used in PostGetAvailableItems when starting items are generated
-            __instance.SelectedVariant = SelectedScenarioVariant = __instance
-                .FindPossibleVariants(__instance.PanelScenarioSelect.SelectedScenario)
+            var selectedScenario = __instance.PanelScenarioSelect.SelectedScenario;
+            __instance.SelectedVariant = _selectedScenarioVariant = __instance
+                .FindPossibleVariants(selectedScenario)
                 .GetRandomElement();
+        }
+        else
+        {
+            _selectedScenarioVariant = scenarioVariant;
         }
     }
 
@@ -33,9 +38,10 @@ public class ForbidItemsPatch
             return;
         }
 
-        var selectedVariant = GameData.ScenarioVariant ?? SelectedScenarioVariant;
-        if (GameData.ScenarioVariant == null)
+        var selectedVariant = GameData.ScenarioVariant ?? _selectedScenarioVariant;
+        if (selectedVariant == null)
         {
+            Plugin.Logger.LogError("AvailableComponentsManager.GetAvailableItems was called outside of scenario.");
             return;
         }
 
