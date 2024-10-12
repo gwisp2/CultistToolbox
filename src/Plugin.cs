@@ -1,4 +1,6 @@
-﻿using BepInEx;
+﻿using System;
+using System.Linq;
+using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -17,6 +19,7 @@ namespace MoMEssentials
         internal static ConfigEntry<bool> ConfigLimitAvailableItems { get; set; }
         internal static ConfigEntry<bool> ConfigShowExpansionIcon { get; set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigSkipPuzzleShortcut { get; set; }
+        internal static ConfigEntry<string> ConfigCollection { get; set; }
 
         private void Awake()
         {
@@ -28,6 +31,10 @@ namespace MoMEssentials
             ConfigLimitAvailableItems = Config.Bind("General", "LimitAvailableItems", false);
             ConfigShowExpansionIcon = Config.Bind("General", "ShowExpansionIcon", true);
             ConfigSkipPuzzleShortcut = Config.Bind("General", "SkipPuzzleKey", KeyboardShortcut.Empty);
+            ConfigCollection = Config.Bind("General", "Collection", "",
+                new ConfigDescription("available expansions", null,
+                    new ConfigurationManagerAttributes
+                        { CustomDrawer = AdvancedCollectionManagerUi.DrawConfiguration }));
             // Patch methods
             var harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             harmony.PatchAll();
