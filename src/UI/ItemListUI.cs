@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BepInEx;
 using FFG.MoM;
 using HutongGames.PlayMaker;
 using MoMEssentials.DeterministicRandom;
@@ -89,7 +88,6 @@ public class ItemListUI
             var texture = itemModel.Image?.Asset?.texture;
             if (lastRect.Contains(_window.GetRelativeMousePosition() + _scrollPosition) && texture)
             {
-                Plugin.Logger.LogInfo("SET TOOLTIP: " + FormatItem(itemModel));
                 _tooltipWindow.SetTooltip(FormatItem(itemModel), texture, 300, Utilities.GetMousePosition());
             }
         }
@@ -104,8 +102,6 @@ public class ItemListUI
             ItemType.Common => "[C]",
             _ => "[-] "
         };
-        var extensionIcon = ItemDatabase.Instance.GetProductIcons(model);
-        prefixes += $"[{extensionIcon}]";
         var name = Localization.Get(model.Name.Key) ?? model.Name.Key;
         var text = prefixes + " " + name;
         return text;

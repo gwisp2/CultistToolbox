@@ -7,6 +7,7 @@ using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
 using MoMEssentials.DeterministicRandom;
+using Random = UnityEngine.Random;
 
 namespace MoMEssentials.Patch;
 
@@ -33,7 +34,7 @@ public class MakeRandomDeterministicPatch
         { (typeof(FFGTools), "GetRandomElement"), MyGetRandomElement },
         { (typeof(FFGTools), "GetRandomElementAndRemove"), MyGetRandomElementAndRemove },
         { (typeof(FFGTools), "GetRandomWeightedIndex"), MyGetRandomWeightedIndex },
-        { (typeof(UnityEngine.Random), "Range"), MyRange },
+        { (typeof(Random), "Range"), MyRange },
         { (typeof(ActionHelpers), "GetRandomWeightedIndex"), MyGetRandomWeightedIndexF },
     };
 

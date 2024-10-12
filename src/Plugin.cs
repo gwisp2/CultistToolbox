@@ -14,6 +14,8 @@ namespace MoMEssentials
     {
         internal new static ManualLogSource Logger;
         internal static ConfigEntry<KeyboardShortcut> ConfigUiKey { get; set; }
+        internal static ConfigEntry<bool> ConfigLimitAvailableItems { get; set; }
+        internal static ConfigEntry<bool> ConfigShowExpansionIcon { get; set; }
 
         private void Awake()
         {
@@ -22,6 +24,8 @@ namespace MoMEssentials
             Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
             // Configuration
             ConfigUiKey = Config.Bind("General", "UIKey", new KeyboardShortcut(KeyCode.F6));
+            ConfigLimitAvailableItems = Config.Bind("General", "LimitAvailableItems", false);
+            ConfigShowExpansionIcon = Config.Bind("General", "ShowExpansionIcon", true);
             // Patch methods
             var harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             harmony.PatchAll();

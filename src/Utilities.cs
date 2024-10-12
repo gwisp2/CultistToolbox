@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using FFG.MoM;
+using UnityEngine;
 
 namespace MoMEssentials;
 
@@ -13,7 +13,7 @@ public static class Utilities
         while (n > 1)
         {
             n--;
-            int k = UnityEngine.Random.RandomRangeInt(0, n + 1);
+            int k = Random.RandomRangeInt(0, n + 1);
             (list[k], list[n]) = (list[n], list[k]);
         }
     }
