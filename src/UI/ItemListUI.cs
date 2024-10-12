@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using FFG.MoM;
-using HarmonyLib;
 using HutongGames.PlayMaker;
 using MoMEssentials.DeterministicRandom;
 using UnityEngine;
@@ -84,7 +83,8 @@ public class ItemListUI
                 isItemAcquired ? Common.HighlightLabelStyle.Value : Common.LabelStyle.Value);
             var lastRect = GUILayoutUtility.GetLastRect();
             var texture = itemModel.Image?.Asset?.texture;
-            if (_window.IsMouseInWindow() && lastRect.Contains(_window.GetRelativeMousePosition() + _scrollPosition) && texture)
+            if (_window.IsMouseInWindow() && lastRect.Contains(_window.GetRelativeMousePosition() + _scrollPosition) &&
+                texture)
             {
                 _tooltipWindow.SetTooltip(FormatItem(itemModel), texture, 300, Utilities.GetMousePosition());
             }
