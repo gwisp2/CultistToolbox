@@ -24,8 +24,6 @@ public class LocalizationPatch
             return;
         }
 
-        Plugin.Logger.LogInfo($"Not an item: {key} / {__result}");
-
         var monster = MonsterDatabase.Instance.GetMonsterByNameKey(key);
         if (monster != null)
         {
