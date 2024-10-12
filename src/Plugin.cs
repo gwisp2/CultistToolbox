@@ -16,6 +16,7 @@ namespace MoMEssentials
         internal static ConfigEntry<KeyboardShortcut> ConfigUiKey { get; set; }
         internal static ConfigEntry<bool> ConfigLimitAvailableItems { get; set; }
         internal static ConfigEntry<bool> ConfigShowExpansionIcon { get; set; }
+        internal static ConfigEntry<KeyboardShortcut> ConfigSkipPuzzleShortcut { get; set; }
 
         private void Awake()
         {
@@ -26,6 +27,7 @@ namespace MoMEssentials
             ConfigUiKey = Config.Bind("General", "UIKey", new KeyboardShortcut(KeyCode.F6));
             ConfigLimitAvailableItems = Config.Bind("General", "LimitAvailableItems", false);
             ConfigShowExpansionIcon = Config.Bind("General", "ShowExpansionIcon", true);
+            ConfigSkipPuzzleShortcut = Config.Bind("General", "SkipPuzzleKey", KeyboardShortcut.Empty);
             // Patch methods
             var harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             harmony.PatchAll();
@@ -37,6 +39,7 @@ namespace MoMEssentials
             DontDestroyOnLoad(pluginObject);
             pluginObject.AddComponent<EssentialsUI>();
             pluginObject.AddComponent<IconFontLocator>();
+            pluginObject.AddComponent<PuzzleSkipper>();
         }
     }
 }
