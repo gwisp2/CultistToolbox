@@ -1,0 +1,17 @@
+# Ignore Visual Studio temporary files
+*.userprefs
+*.suo
+*.user
+*.tmp
+
+# Ignore build results
+[Oo]bj/
+[Bb]in/
+
+# Ignore lib
+lib/
+
+# Ignore editor files
+.idea/
+.vs/
+
