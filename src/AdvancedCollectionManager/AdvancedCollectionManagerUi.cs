@@ -47,6 +47,7 @@ public class AdvancedCollectionManagerUi
             DrawItem(item, item.ProductModel.CanToggle);
         }
 
+        DrawMargin();
         GUILayout.EndVertical();
         typedEntry.Value = collection.Freeze();
     }
@@ -63,7 +64,13 @@ public class AdvancedCollectionManagerUi
             DrawItem(item, false);
         }
 
+        DrawMargin();
         GUILayout.EndVertical();
+    }
+
+    private void DrawMargin()
+    {
+        GUILayout.Label("", _headerStyles.Value[0]); // just for margin
     }
 
     private void DrawItem(AdvancedUserCollectionItem item, bool editable)
