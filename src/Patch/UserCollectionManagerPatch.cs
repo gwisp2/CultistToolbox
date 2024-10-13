@@ -103,7 +103,7 @@ public class UserCollectionManagerPatch
         __result = flag;
         return false;
     }
- 
+
     [HarmonyPatch("Quantity")]
     [HarmonyPrefix]
     public static bool PreQuantity(ProductModel p, ref int __result)
@@ -125,7 +125,7 @@ public class UserCollectionManagerPatch
     private static void UpdateFromPluginConfig()
     {
         // Load _collection from config
-        _collection.LoadFromString(Plugin.ConfigCollection.Value);
+        var changeType = _collection.LoadFromString(Plugin.ConfigCollection.Value);
 
         // Fix in UI
         foreach (var collectionProduct in UI.Utilities.FindComponents<CollectionProduct>(false))
@@ -146,6 +146,14 @@ public class UserCollectionManagerPatch
             var scenario = _curScenarioRef(scenarioSelectionController);
             if (scenario == null) continue;
             scenarioSelectionController.LoadScenario(scenario);
+        }
+
+        if (changeType.HasFlag(AdvancedUserCollection.CollectionChangeType.Investigators))
+        {
+            foreach (var setupViewController in UI.Utilities.FindComponents<SetupViewController>(false))
+            {
+                setupViewController.LoadInvestigators();
+            }
         }
     }
 }

@@ -1,17 +1,72 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MoMEssentials.AdvancedCollectionManager;
 
 public class AdvancedUserCollection
 {
+    [Flags]
+    public enum CollectionChangeType
+    {
+        Investigators = 1,
+        Items = 2,
+        Monsters = 4,
+        OtherContent = 8,
+    }
+
     public class Item(ProductModel productModel)
     {
+        private bool _hasInvestigators = !productModel.CanToggle;
+        private bool _hasMonsters = !productModel.CanToggle;
+        private bool _hasItems = !productModel.CanToggle;
+        private bool _hasOtherContent = !productModel.CanToggle;
         public ProductModel ProductModel { get; } = productModel;
-        public bool HasInvestigators { get; set; }
-        public bool HasMonsters { get; set; }
-        public bool HasItems { get; set; }
-        public bool HasOtherContent { get; set; }
+        public bool CanToggle => ProductModel.CanToggle;
+
+        public bool HasInvestigators
+        {
+            get => _hasInvestigators;
+            set
+            {
+                if (!CanToggle && !value)
+                    throw new InvalidOperationException("Cannot change value when CanToggle is false");
+                _hasInvestigators = value;
+            }
+        }
+
+        public bool HasMonsters
+        {
+            get => _hasMonsters;
+            set
+            {
+                if (!CanToggle && !value)
+                    throw new InvalidOperationException("Cannot change value when CanToggle is false");
+                _hasMonsters = value;
+            }
+        }
+
+        public bool HasItems
+        {
+            get => _hasItems;
+            set
+            {
+                if (!CanToggle && !value)
+                    throw new InvalidOperationException("Cannot change value when CanToggle is false");
+                _hasItems = value;
+            }
+        }
+
+        public bool HasOtherContent
+        {
+            get => _hasOtherContent;
+            set
+            {
+                if (!CanToggle && !value)
+                    throw new InvalidOperationException("Cannot change value when CanToggle is false");
+                _hasOtherContent = value;
+            }
+        }
 
         public void SetEverything(bool value)
         {
@@ -30,12 +85,38 @@ public class AdvancedUserCollection
                    FormatBool(HasOtherContent, "o");
         }
 
-        public void LoadFromString(string value)
+        public CollectionChangeType LoadFromString(string value)
         {
-            HasItems = value.Contains("i");
-            HasMonsters = value.Contains("m");
-            HasInvestigators = value.Contains("I");
-            HasOtherContent = value.Contains("o");
+            bool newHasItems = value.Contains("i");
+            bool newHasMonsters = value.Contains("m");
+            bool newHasInvestigators = value.Contains("I");
+            bool newHasOtherContent = value.Contains("o");
+            CollectionChangeType changeType = 0;
+            if (HasItems != newHasItems)
+            {
+                changeType |= CollectionChangeType.Items;
+                HasItems = newHasItems;
+            }
+
+            if (HasMonsters != newHasMonsters)
+            {
+                changeType |= CollectionChangeType.Monsters;
+                HasMonsters = newHasMonsters;
+            }
+
+            if (HasInvestigators != newHasInvestigators)
+            {
+                changeType |= CollectionChangeType.Investigators;
+                HasInvestigators = newHasInvestigators;
+            }
+
+            if (HasOtherContent != newHasOtherContent)
+            {
+                changeType |= CollectionChangeType.OtherContent;
+                HasOtherContent = newHasOtherContent;
+            }
+
+            return changeType;
         }
 
         private string FormatBool(bool value, string letter) => value ? letter : "";
@@ -48,7 +129,7 @@ public class AdvancedUserCollection
     {
         _items = MoMDBManager.DB.GetProducts().OrderBy(p => p.ProductCode)
             .Select(p => new Item(p)).ToList();
-        ForceIncludeBaseGame();
+        Reset();
     }
 
     public AdvancedUserCollection(string value) : this()
@@ -97,31 +178,35 @@ public class AdvancedUserCollection
     {
         foreach (var item in _items)
         {
-            item.SetEverything(false);
+            if (!item.CanToggle) continue;
+            item.SetEverything(!item.ProductModel.CanToggle);
         }
-
-        ForceIncludeBaseGame();
     }
 
-    public void LoadFromString(string value)
+    public CollectionChangeType LoadFromString(string value)
     {
-        Reset();
+        CollectionChangeType changeType = 0;
+        var valueAsDict = new Dictionary<string, string>();
         foreach (var parts in value.Split([',']))
         {
             var kv = parts.Split([':'], 2);
             if (kv.Length != 2) continue;
-            var k = kv[0];
-            var v = kv[1];
-            var item = _items.FirstOrDefault(i => i.ProductModel.ProductCode == k);
-            if (item == null) continue;
-            item.LoadFromString(v);
+            valueAsDict[kv[0]] = kv[1];
         }
 
-        ForceIncludeBaseGame();
-    }
+        foreach (var item in _items)
+        {
+            if (!item.CanToggle) continue;
+            if (valueAsDict.TryGetValue(item.ProductModel.ProductCode, out var v))
+            {
+                changeType |= item.LoadFromString(v);
+            }
+            else
+            {
+                changeType |= item.LoadFromString("");
+            }
+        }
 
-    private void ForceIncludeBaseGame()
-    {
-        Get("MAD20").SetEverything(true);
+        return changeType;
     }
 }

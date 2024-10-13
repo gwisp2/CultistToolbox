@@ -46,28 +46,7 @@ public class AdvancedCollectionManagerUi
         GUILayout.BeginVertical();
         foreach (var item in _collection.Items)
         {
-            int styleIndex = item.IsEverythingSelected ? 2 : item.IsAnythingSelected ? 1 : 0;
-            var productTitle = Utilities.GetProductIcons(item.ProductModel) + " " + item.ProductModel.ProductName;
-            GUILayout.Label(productTitle, _headerStyles.Value[styleIndex]);
-            GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Select all", _buttonStyles.Value[styleIndex]))
-            {
-                item.SetEverything(true);
-            }
-            else if (GUILayout.Button("Select none", _buttonStyles.Value[styleIndex]))
-            {
-                item.SetEverything(false);
-            }
-
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            item.HasInvestigators =
-                GUILayout.Toggle(item.HasInvestigators, "Investigators", _toggleStyles.Value[styleIndex]);
-            item.HasItems = GUILayout.Toggle(item.HasItems, "Items", _toggleStyles.Value[styleIndex]);
-            item.HasMonsters = GUILayout.Toggle(item.HasMonsters, "Monsters", _toggleStyles.Value[styleIndex]);
-            item.HasOtherContent =
-                GUILayout.Toggle(item.HasOtherContent, "Other content", _toggleStyles.Value[styleIndex]);
-            GUILayout.EndHorizontal();
+            DrawItem(item, item.CanToggle);
         }
 
         GUILayout.EndVertical();
@@ -79,22 +58,57 @@ public class AdvancedCollectionManagerUi
         GUILayout.BeginVertical();
         GUILayout.Label(
             "The following components are enabled in this scenario. This is affected by LimitAvailableItems.");
-        var effectiveCollection = AdvancedCollectionFacade.GetEffectiveCollection();
+        var effectiveCollection = AdvancedCollectionFacade.GetEffectiveCollectionForCurrentScenario();
         foreach (var item in effectiveCollection.Items)
         {
             if (!item.IsAnythingSelected) continue;
-            int styleIndex = item.IsEverythingSelected ? 2 : item.IsAnythingSelected ? 1 : 0;
-            var productTitle = Utilities.GetProductIcons(item.ProductModel) + " " + item.ProductModel.ProductName;
-            GUILayout.Label(productTitle, _headerStyles.Value[styleIndex]);
-            GUILayout.BeginHorizontal();
-            GUILayout.Toggle(item.HasInvestigators, "Investigators", _toggleStyles.Value[styleIndex]);
-            GUILayout.Toggle(item.HasItems, "Items", _toggleStyles.Value[styleIndex]);
-            GUILayout.Toggle(item.HasMonsters, "Monsters", _toggleStyles.Value[styleIndex]);
-            GUILayout.Toggle(item.HasOtherContent, "Other content", _toggleStyles.Value[styleIndex]);
-            GUILayout.EndHorizontal();
+            DrawItem(item, false);
         }
 
         GUILayout.EndVertical();
+    }
+
+    private void DrawItem(AdvancedUserCollection.Item item, bool editable)
+    {
+        int styleIndex = GetStyleIndex(item);
+        var productTitle = Utilities.GetProductIcons(item.ProductModel) + " " + item.ProductModel.ProductName;
+        GUILayout.Label(productTitle, _headerStyles.Value[styleIndex]);
+        if (editable)
+        {
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Select all", _buttonStyles.Value[styleIndex]))
+            {
+                item.SetEverything(true);
+            }
+            else if (GUILayout.Button("Select none", _buttonStyles.Value[styleIndex]))
+            {
+                item.SetEverything(false);
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.BeginHorizontal();
+        bool hasInvestigators =
+            GUILayout.Toggle(item.HasInvestigators, "Investigators", _toggleStyles.Value[styleIndex]);
+        bool hasItems = GUILayout.Toggle(item.HasItems, "Items", _toggleStyles.Value[styleIndex]);
+        bool hasMonsters = GUILayout.Toggle(item.HasMonsters, "Monsters", _toggleStyles.Value[styleIndex]);
+        bool hasOtherContent = GUILayout.Toggle(item.HasOtherContent, "Other content", _toggleStyles.Value[styleIndex]);
+        if (editable)
+        {
+            item.HasInvestigators = hasInvestigators;
+            item.HasItems = hasItems;
+            item.HasMonsters = hasMonsters;
+            item.HasOtherContent = hasOtherContent;
+        }
+
+        GUILayout.EndHorizontal();
+    }
+
+    private static int GetStyleIndex(AdvancedUserCollection.Item item)
+    {
+        int styleIndex = item.IsEverythingSelected ? 2 : item.IsAnythingSelected ? 1 : 0;
+        return styleIndex;
     }
 
     public static void DrawConfiguration(ConfigEntryBase entry)

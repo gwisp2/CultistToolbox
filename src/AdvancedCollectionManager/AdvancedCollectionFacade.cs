@@ -5,9 +5,14 @@ namespace MoMEssentials.AdvancedCollectionManager;
 
 public static class AdvancedCollectionFacade
 {
-    public static AdvancedUserCollection GetEffectiveCollection()
+    public static AdvancedUserCollection GetCurrentAdvancedUserCollection()
     {
-        var collection = new AdvancedUserCollection(Plugin.ConfigCollection.Value);
+        return new AdvancedUserCollection(Plugin.ConfigCollection.Value);
+    }
+
+    public static AdvancedUserCollection GetEffectiveCollectionForCurrentScenario()
+    {
+        var collection = GetCurrentAdvancedUserCollection();
         var scenarioVariant = CurrentScenarioVariantPatch.CurrentScenarioVariant;
         if (scenarioVariant == null)
         {

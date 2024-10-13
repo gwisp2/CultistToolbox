@@ -27,7 +27,7 @@ public class AvailableComponentsManagerPatch
         featureCounts.Clear();
 
         // Get product collection
-        var collection = AdvancedCollectionFacade.GetEffectiveCollection();
+        var collection = AdvancedCollectionFacade.GetEffectiveCollectionForCurrentScenario();
 
         // Add monsters
         foreach (var productModel in collection.Items.Where(i => i.HasMonsters).Select(i => i.ProductModel))
