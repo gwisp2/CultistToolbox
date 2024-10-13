@@ -28,7 +28,6 @@ public class AdvancedCollectionManagerUi
     {
         var style = new GUIStyle(GUI.skin.toggle);
         style.normal.textColor = color;
-        style.font = IconFontLocator.IconFont;
         return style;
     }).ToArray());
 
@@ -36,7 +35,6 @@ public class AdvancedCollectionManagerUi
     {
         var style = new GUIStyle(GUI.skin.button);
         style.normal.textColor = color;
-        style.font = IconFontLocator.IconFont;
         return style;
     }).ToArray());
 
@@ -88,21 +86,36 @@ public class AdvancedCollectionManagerUi
             GUILayout.EndHorizontal();
         }
 
+        var nInvestigators = item.ProductModel.Investigators.Count;
+        var nItems = item.ProductModel.Items.Count;
+        var nMonsters = item.ProductModel.Monsters.Count;
+        var nTiles = item.ProductModel.TileQuantity;
+        var nMythos = item.ProductModel.CanToggle
+            ? MoMDBManager.DB.MythosEvents.Count(e =>
+                e.RequiredProducts != null && e.RequiredProducts.Contains(item.ProductModel))
+            : MoMDBManager.DB.MythosEvents.Count(e =>
+                e.RequiredProducts == null || !e.RequiredProducts.Any() ||
+                (e.RequiredProducts != null && e.RequiredProducts.Contains(item.ProductModel)));
         GUILayout.BeginHorizontal();
-        bool hasInvestigators =
-            GUILayout.Toggle(item.HasInvestigators, "Investigators", _toggleStyles.Value[styleIndex]);
-        bool hasItems = GUILayout.Toggle(item.HasItems, "Items", _toggleStyles.Value[styleIndex]);
-        bool hasMonsters = GUILayout.Toggle(item.HasMonsters, "Monsters", _toggleStyles.Value[styleIndex]);
-        bool hasOtherContent = GUILayout.Toggle(item.HasOtherContent, "Other content", _toggleStyles.Value[styleIndex]);
+        bool hasInvestigators = GUILayout.Toggle(item.HasInvestigators, $"Investigators ({nInvestigators})",
+            _toggleStyles.Value[styleIndex]);
+        bool hasItems = GUILayout.Toggle(item.HasItems, $"Items ({nItems})", _toggleStyles.Value[styleIndex]);
+        bool hasMonsters =
+            GUILayout.Toggle(item.HasMonsters, $"Monsters ({nMonsters})", _toggleStyles.Value[styleIndex]);
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        bool hasMythos = GUILayout.Toggle(item.HasMythosEvents, $"Mythos events ({nMythos})",
+            _toggleStyles.Value[styleIndex]);
+        bool hasTiles = GUILayout.Toggle(item.HasTiles, $"Tiles ({nTiles})", _toggleStyles.Value[styleIndex]);
+        GUILayout.EndHorizontal();
         if (editable)
         {
             item.HasInvestigators = hasInvestigators;
             item.HasItems = hasItems;
             item.HasMonsters = hasMonsters;
-            item.HasOtherContent = hasOtherContent;
+            item.HasMythosEvents = hasMythos;
+            item.HasTiles = hasTiles;
         }
-
-        GUILayout.EndHorizontal();
     }
 
     private static int GetStyleIndex(AdvancedUserCollection.Item item)

@@ -148,7 +148,7 @@ public class UserCollectionManagerPatch
             scenarioSelectionController.LoadScenario(scenario);
         }
 
-        if (changeType.HasFlag(AdvancedUserCollection.CollectionChangeType.Investigators))
+        if (changeType.HasFlag(AdvancedUserCollection.ItemComponentTypes.Investigators))
         {
             foreach (var setupViewController in UI.Utilities.FindComponents<SetupViewController>(false))
             {

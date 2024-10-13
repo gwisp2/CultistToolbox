@@ -7,116 +7,101 @@ namespace MoMEssentials.AdvancedCollectionManager;
 public class AdvancedUserCollection
 {
     [Flags]
-    public enum CollectionChangeType
+    public enum ItemComponentTypes
     {
         Investigators = 1,
         Items = 2,
         Monsters = 4,
-        OtherContent = 8,
+        MythosEvents = 8,
+        Tiles = 16,
+        All = 31
     }
 
     public class Item(ProductModel productModel)
     {
-        private bool _hasInvestigators = !productModel.CanToggle;
-        private bool _hasMonsters = !productModel.CanToggle;
-        private bool _hasItems = !productModel.CanToggle;
-        private bool _hasOtherContent = !productModel.CanToggle;
+        private ItemComponentTypes _presentComponents = !productModel.CanToggle ? ItemComponentTypes.All : 0;
         public ProductModel ProductModel { get; } = productModel;
         public bool CanToggle => ProductModel.CanToggle;
 
         public bool HasInvestigators
         {
-            get => _hasInvestigators;
-            set
-            {
-                if (!CanToggle && !value)
-                    throw new InvalidOperationException("Cannot change value when CanToggle is false");
-                _hasInvestigators = value;
-            }
+            get => AllPresent(ItemComponentTypes.Investigators);
+            set => Set(ItemComponentTypes.Investigators, value);
         }
 
         public bool HasMonsters
         {
-            get => _hasMonsters;
-            set
-            {
-                if (!CanToggle && !value)
-                    throw new InvalidOperationException("Cannot change value when CanToggle is false");
-                _hasMonsters = value;
-            }
+            get => AllPresent(ItemComponentTypes.Monsters);
+            set => Set(ItemComponentTypes.Monsters, value);
         }
 
         public bool HasItems
         {
-            get => _hasItems;
-            set
-            {
-                if (!CanToggle && !value)
-                    throw new InvalidOperationException("Cannot change value when CanToggle is false");
-                _hasItems = value;
-            }
+            get => AllPresent(ItemComponentTypes.Items);
+            set => Set(ItemComponentTypes.Items, value);
         }
 
-        public bool HasOtherContent
+        public bool HasMythosEvents
         {
-            get => _hasOtherContent;
-            set
+            get => AllPresent(ItemComponentTypes.MythosEvents);
+            set => Set(ItemComponentTypes.MythosEvents, value);
+        }
+
+        public bool HasTiles
+        {
+            get => AllPresent(ItemComponentTypes.Tiles);
+            set => Set(ItemComponentTypes.Tiles, value);
+        }
+
+        public bool AllPresent(ItemComponentTypes types)
+        {
+            return (_presentComponents & types) == types;
+        }
+
+        private ItemComponentTypes Set(ItemComponentTypes types, bool present)
+        {
+            if (!CanToggle)
+                return 0;
+
+            var oldValue = _presentComponents;
+            if (present)
             {
-                if (!CanToggle && !value)
-                    throw new InvalidOperationException("Cannot change value when CanToggle is false");
-                _hasOtherContent = value;
+                _presentComponents |= types;
             }
+            else
+            {
+                _presentComponents &= ~types;
+            }
+
+            return oldValue ^ _presentComponents;
         }
 
         public void SetEverything(bool value)
         {
-            this.HasItems = value;
-            this.HasMonsters = value;
-            this.HasOtherContent = value;
-            this.HasInvestigators = value;
+            Set(ItemComponentTypes.All, value);
         }
 
-        public bool IsAnythingSelected => HasInvestigators || HasMonsters || HasItems || HasOtherContent;
-        public bool IsEverythingSelected => HasInvestigators && HasMonsters && HasItems && HasOtherContent;
+        public bool IsAnythingSelected => _presentComponents != 0;
+        public bool IsEverythingSelected => _presentComponents == ItemComponentTypes.All;
 
         public string SaveToString()
         {
             return FormatBool(HasItems, "i") + FormatBool(HasMonsters, "m") + FormatBool(HasInvestigators, "I") +
-                   FormatBool(HasOtherContent, "o");
+                   FormatBool(HasMythosEvents, "M") + FormatBool(HasTiles, "t");
         }
 
-        public CollectionChangeType LoadFromString(string value)
+        public ItemComponentTypes LoadFromString(string value)
         {
-            bool newHasItems = value.Contains("i");
-            bool newHasMonsters = value.Contains("m");
-            bool newHasInvestigators = value.Contains("I");
-            bool newHasOtherContent = value.Contains("o");
-            CollectionChangeType changeType = 0;
-            if (HasItems != newHasItems)
-            {
-                changeType |= CollectionChangeType.Items;
-                HasItems = newHasItems;
-            }
-
-            if (HasMonsters != newHasMonsters)
-            {
-                changeType |= CollectionChangeType.Monsters;
-                HasMonsters = newHasMonsters;
-            }
-
-            if (HasInvestigators != newHasInvestigators)
-            {
-                changeType |= CollectionChangeType.Investigators;
-                HasInvestigators = newHasInvestigators;
-            }
-
-            if (HasOtherContent != newHasOtherContent)
-            {
-                changeType |= CollectionChangeType.OtherContent;
-                HasOtherContent = newHasOtherContent;
-            }
-
-            return changeType;
+            if (!CanToggle) return 0;
+            ItemComponentTypes target = 0;
+            target |= value.Contains("i") ? ItemComponentTypes.Items : 0;
+            target |= value.Contains("m") ? ItemComponentTypes.Monsters : 0;
+            target |= value.Contains("I") ? ItemComponentTypes.Investigators : 0;
+            target |= value.Contains("M") ? ItemComponentTypes.MythosEvents : 0;
+            target |= value.Contains("t") ? ItemComponentTypes.Tiles : 0;
+            var changeMask = _presentComponents & target;
+            _presentComponents = target;
+            return changeMask;
         }
 
         private string FormatBool(bool value, string letter) => value ? letter : "";
@@ -167,6 +152,11 @@ public class AdvancedUserCollection
         return Get(productModel)?.IsEverythingSelected ?? false;
     }
 
+    public bool HasAllProducts(IEnumerable<ProductModel> products, ItemComponentTypes componentTypes)
+    {
+        return products.All(p => Get(p)?.AllPresent(componentTypes) ?? false);
+    }
+
     public string SaveToString()
     {
         var itemsInCollection = _items.Where(i => i.IsAnythingSelected).ToList();
@@ -183,9 +173,9 @@ public class AdvancedUserCollection
         }
     }
 
-    public CollectionChangeType LoadFromString(string value)
+    public ItemComponentTypes LoadFromString(string value)
     {
-        CollectionChangeType changeType = 0;
+        ItemComponentTypes changeType = 0;
         var valueAsDict = new Dictionary<string, string>();
         foreach (var parts in value.Split([',']))
         {
