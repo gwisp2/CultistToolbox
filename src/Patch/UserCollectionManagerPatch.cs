@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FFG.Common;
 using FFG.MoM;
 using HarmonyLib;
+using MoMEssentials.AdvancedCollectionManager;
 
 namespace MoMEssentials.Patch;
 
@@ -102,7 +103,7 @@ public class UserCollectionManagerPatch
         __result = flag;
         return false;
     }
-
+ 
     [HarmonyPatch("Quantity")]
     [HarmonyPrefix]
     public static bool PreQuantity(ProductModel p, ref int __result)

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Linq;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using MoMEssentials.AdvancedCollectionManager;
 using MoMEssentials.DeterministicRandom;
 using MoMEssentials.Patch;
 using MoMEssentials.UI;

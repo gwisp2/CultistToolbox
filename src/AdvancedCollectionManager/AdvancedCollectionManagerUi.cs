@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
 using BepInEx.Configuration;
+using MoMEssentials.Patch;
 using MoMEssentials.UI;
 using UnityEngine;
 
-namespace MoMEssentials;
+namespace MoMEssentials.AdvancedCollectionManager;
 
 public class AdvancedCollectionManagerUi
 {
@@ -13,9 +14,6 @@ public class AdvancedCollectionManagerUi
 
     private readonly AdvancedUserCollection _collection = new AdvancedUserCollection();
     private static readonly Color[] Colors = [Color.red, Color.yellow, Color.green];
-
-    private static readonly string[] DisabledOnGameObjectsNames =
-        ["InvestigatorSelection", "StartingItems", "SpriteDarkening", "Transition_Quote", "Scenario"];
 
     private Lazy<GUIStyle[]> _headerStyles = new(() => Colors.Select(color =>
     {
@@ -42,7 +40,7 @@ public class AdvancedCollectionManagerUi
         return style;
     }).ToArray());
 
-    private void DrawConfigurationImpl(ConfigEntryBase entry)
+    private void DrawCollectionEditorImpl(ConfigEntryBase entry)
     {
         _collection.LoadFromString(entry.BoxedValue as string);
         GUILayout.BeginVertical();
@@ -73,20 +71,42 @@ public class AdvancedCollectionManagerUi
         }
 
         GUILayout.EndVertical();
-        if (IsEditingAllowed())
+        entry.BoxedValue = _collection.SaveToString();
+    }
+
+    private void DrawEffectiveCollectionImpl()
+    {
+        GUILayout.BeginVertical();
+        GUILayout.Label(
+            "The following components are enabled in this scenario. This is affected by LimitAvailableItems.");
+        var effectiveCollection = AdvancedCollectionFacade.GetEffectiveCollection();
+        foreach (var item in effectiveCollection.Items)
         {
-            // Otherwise it will be reset at the start of this method
-            entry.BoxedValue = _collection.SaveToString();
+            if (!item.IsAnythingSelected) continue;
+            int styleIndex = item.IsEverythingSelected ? 2 : item.IsAnythingSelected ? 1 : 0;
+            var productTitle = Utilities.GetProductIcons(item.ProductModel) + " " + item.ProductModel.ProductName;
+            GUILayout.Label(productTitle, _headerStyles.Value[styleIndex]);
+            GUILayout.BeginHorizontal();
+            GUILayout.Toggle(item.HasInvestigators, "Investigators", _toggleStyles.Value[styleIndex]);
+            GUILayout.Toggle(item.HasItems, "Items", _toggleStyles.Value[styleIndex]);
+            GUILayout.Toggle(item.HasMonsters, "Monsters", _toggleStyles.Value[styleIndex]);
+            GUILayout.Toggle(item.HasOtherContent, "Other content", _toggleStyles.Value[styleIndex]);
+            GUILayout.EndHorizontal();
         }
+
+        GUILayout.EndVertical();
     }
 
     public static void DrawConfiguration(ConfigEntryBase entry)
     {
-        Instance.DrawConfigurationImpl(entry);
+        if (IsEditingAllowed())
+            Instance.DrawCollectionEditorImpl(entry);
+        else
+            Instance.DrawEffectiveCollectionImpl();
     }
 
-    private bool IsEditingAllowed()
+    private static bool IsEditingAllowed()
     {
-        return !DisabledOnGameObjectsNames.Any(name => GameObject.Find(name)?.activeInHierarchy ?? false);
+        return CurrentScenarioVariantPatch.CurrentScenarioVariant == null;
     }
 }

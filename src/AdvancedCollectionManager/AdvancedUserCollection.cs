@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace MoMEssentials;
+namespace MoMEssentials.AdvancedCollectionManager;
 
 public class AdvancedUserCollection
 {
@@ -64,11 +64,6 @@ public class AdvancedUserCollection
     public void RemoveProduct(ProductModel product)
     {
         Get(product.ProductCode).SetEverything(false);
-    }
-
-    public IEnumerable<ProductModel> GetIncludedCompleteProducts()
-    {
-        return _items.Where(item => item.IsEverythingSelected).Select(i => i.ProductModel);
     }
 
     public Dictionary<ProductModel, int> GetCompleteProductQuantities()
