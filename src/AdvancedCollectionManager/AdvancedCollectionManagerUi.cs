@@ -11,10 +11,13 @@ public class AdvancedCollectionManagerUi
     private static AdvancedCollectionManagerUi _instance;
     public static AdvancedCollectionManagerUi Instance => _instance ??= new AdvancedCollectionManagerUi();
 
-    private AdvancedUserCollection _collection = new AdvancedUserCollection();
-    private static Color[] _colors = [Color.red, Color.yellow, Color.green];
+    private readonly AdvancedUserCollection _collection = new AdvancedUserCollection();
+    private static readonly Color[] Colors = [Color.red, Color.yellow, Color.green];
 
-    private Lazy<GUIStyle[]> _headerStyles = new(() => _colors.Select(color =>
+    private static readonly string[] DisabledOnGameObjectsNames =
+        ["InvestigatorSelection", "StartingItems", "SpriteDarkening", "Transition_Quote", "Scenario"];
+
+    private Lazy<GUIStyle[]> _headerStyles = new(() => Colors.Select(color =>
     {
         var style = new GUIStyle(GUI.skin.label);
         style.normal.textColor = color;
@@ -23,7 +26,7 @@ public class AdvancedCollectionManagerUi
         return style;
     }).ToArray());
 
-    private Lazy<GUIStyle[]> _toggleStyles = new(() => _colors.Select(color =>
+    private Lazy<GUIStyle[]> _toggleStyles = new(() => Colors.Select(color =>
     {
         var style = new GUIStyle(GUI.skin.toggle);
         style.normal.textColor = color;
@@ -31,7 +34,7 @@ public class AdvancedCollectionManagerUi
         return style;
     }).ToArray());
 
-    private Lazy<GUIStyle[]> _buttonStyles = new(() => _colors.Select(color =>
+    private Lazy<GUIStyle[]> _buttonStyles = new(() => Colors.Select(color =>
     {
         var style = new GUIStyle(GUI.skin.button);
         style.normal.textColor = color;
@@ -70,11 +73,20 @@ public class AdvancedCollectionManagerUi
         }
 
         GUILayout.EndVertical();
-        entry.BoxedValue = _collection.SaveToString();
+        if (IsEditingAllowed())
+        {
+            // Otherwise it will be reset at the start of this method
+            entry.BoxedValue = _collection.SaveToString();
+        }
     }
 
     public static void DrawConfiguration(ConfigEntryBase entry)
     {
         Instance.DrawConfigurationImpl(entry);
+    }
+
+    private bool IsEditingAllowed()
+    {
+        return !DisabledOnGameObjectsNames.Any(name => GameObject.Find(name)?.activeInHierarchy ?? false);
     }
 }

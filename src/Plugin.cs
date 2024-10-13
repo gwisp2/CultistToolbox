@@ -41,6 +41,8 @@ namespace MoMEssentials
             // Make random deterministic
             TrackActionPatch.OnActionMethodStart += (action) => DeterministicRandomFacade.OpenContext(action);
             TrackActionPatch.OnActionMethodEnd += DeterministicRandomFacade.CloseContext;
+            // Setup collection manager
+            UserCollectionManagerPatch.Setup();
             // Create UI
             var pluginObject = new GameObject(MyPluginInfo.PLUGIN_GUID);
             DontDestroyOnLoad(pluginObject);

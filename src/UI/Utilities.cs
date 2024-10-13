@@ -26,7 +26,7 @@ public static class Utilities
         return FindComponents<PlayMakerFSM>().Select(component => component.Fsm).Where(fsm => fsm != null);
     }
 
-    public static IEnumerable<T> FindComponents<T>()
+    public static IEnumerable<T> FindComponents<T>(bool includeInactive = true)
     {
         for (var i = 0; i < SceneManager.sceneCount; i++)
         {
@@ -39,7 +39,7 @@ public static class Utilities
                     yield return componentInRootObject;
                 }
 
-                foreach (var component in gameObject.GetComponentsInChildren<T>(true))
+                foreach (var component in gameObject.GetComponentsInChildren<T>(includeInactive))
                 {
                     yield return component;
                 }
