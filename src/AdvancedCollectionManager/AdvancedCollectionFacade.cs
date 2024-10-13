@@ -7,7 +7,7 @@ public static class AdvancedCollectionFacade
 {
     public static AdvancedUserCollection GetCurrentAdvancedUserCollection()
     {
-        return new AdvancedUserCollection(Plugin.ConfigCollection.Value);
+        return Plugin.ConfigCollection.Value;
     }
 
     public static AdvancedUserCollection GetEffectiveCollectionForCurrentScenario()
@@ -21,7 +21,7 @@ public static class AdvancedCollectionFacade
         }
 
         // Remove items that are not required in this scenario
-        if (Plugin.ConfigLimitAvailableItems.Value)
+        if (Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.Items))
         {
             foreach (var collectionItem in collection.Items)
             {

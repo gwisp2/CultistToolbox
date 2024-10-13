@@ -1,49 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FFG.Common;
 using FFG.MoM;
 using HarmonyLib;
-using MoMEssentials.AdvancedCollectionManager;
 
 namespace MoMEssentials.Patch;
 
 [HarmonyPatch(typeof(UserCollectionManager))]
 public class UserCollectionManagerPatch
 {
-    // Synchronized with Plugin.ConfigCollection.Value
-    private static AdvancedUserCollection _collection;
-
     private static AccessTools.FieldRef<CollectionProductMenu, ProductModel> _curModelRef =
         AccessTools.FieldRefAccess<CollectionProductMenu, ProductModel>("_curModel");
 
     private static AccessTools.FieldRef<ScenarioSelectionController, Scenario> _curScenarioRef =
         AccessTools.FieldRefAccess<ScenarioSelectionController, Scenario>("_curScenario");
 
+    private static readonly AccessTools.FieldRef<InvestigatorSelectionManager, IEnumerable<InvestigatorModel>>
+        AvailableInvestigatorsRef =
+            AccessTools.FieldRefAccess<InvestigatorSelectionManager, IEnumerable<InvestigatorModel>>(
+                "_availableInvestigators");
+
     [HarmonyPatch("LoadUserCollection")]
     [HarmonyPrefix]
     private static bool PreLoadUserCollection()
     {
         // Initialize from plugin config
-        _collection ??= new AdvancedUserCollection();
-        _collection.LoadFromString(Plugin.ConfigCollection.Value);
+        var collection = Plugin.ConfigCollection.Value.Copy();
 
         // Apply original game settings where possible
         foreach (ProductModel product in MoMDBManager.DB.GetProducts())
         {
             if (product == null) continue;
+            collection.AddEmptyProduct(product); // add it to collection for further edit
             bool available = FFGPlayerPrefs.GetInt(product.ProductCode) > 0;
             if (available)
             {
-                _collection.AddCompleteProduct(product);
+                collection.AddCompleteProduct(product);
             }
-            else if (_collection.Get(product).IsEverythingSelected)
+            else if (collection.Get(product).IsEverythingSelected)
             {
-                _collection.RemoveProduct(product);
+                collection.RemoveProduct(product);
             }
         }
 
         // Save applied changes
-        SaveToPluginConfig();
+        Plugin.ConfigCollection.Value = collection.Freeze();
 
         return false;
     }
@@ -52,7 +54,7 @@ public class UserCollectionManagerPatch
     [HarmonyPrefix]
     private static bool PreGetProductCollection(ref Dictionary<ProductModel, int> __result)
     {
-        __result = _collection.GetCompleteProductQuantities();
+        __result = Plugin.ConfigCollection.Value.GetCompleteProductQuantities();
         return false;
     }
 
@@ -60,9 +62,10 @@ public class UserCollectionManagerPatch
     [HarmonyPrefix]
     private static bool PreAddProduct(ProductModel p, int quantity)
     {
-        if (_collection == null) return false; // AddProduct is called once before LoadUserCollection, ignore that
-        if (quantity >= 1) _collection.AddCompleteProduct(p);
-        SaveToPluginConfig();
+        if (!p.CanToggle)
+            return false; // AddProduct is called once before LoadUserCollection for the base game, ignore that
+        if (quantity >= 1)
+            Plugin.ConfigCollection.Value = Plugin.ConfigCollection.Value.Copy().AddCompleteProduct(p).Freeze();
         return false;
     }
 
@@ -70,9 +73,9 @@ public class UserCollectionManagerPatch
     [HarmonyPrefix]
     private static bool PreSetProductQuantity(ProductModel product, int quantity)
     {
-        if (quantity >= 1) _collection.AddCompleteProduct(product);
-        else _collection.RemoveProduct(product);
-        SaveToPluginConfig();
+        Plugin.ConfigCollection.Value = quantity >= 1
+            ? Plugin.ConfigCollection.Value.Copy().AddCompleteProduct(product).Freeze()
+            : Plugin.ConfigCollection.Value.Copy().RemoveProduct(product).Freeze();
         return false;
     }
 
@@ -80,8 +83,7 @@ public class UserCollectionManagerPatch
     [HarmonyPrefix]
     private static bool PreRemoveProduct(ProductModel product)
     {
-        _collection.RemoveProduct(product);
-        SaveToPluginConfig();
+        Plugin.ConfigCollection.Value = Plugin.ConfigCollection.Value.Copy().RemoveProduct(product).Freeze();
         return false;
     }
 
@@ -89,13 +91,13 @@ public class UserCollectionManagerPatch
     [HarmonyPrefix]
     public static bool IsOwned(ProductModel product, bool checkEquivalentProduct, ref bool __result)
     {
-        bool flag = _collection.HasCompleteProduct(product);
+        bool flag = Plugin.ConfigCollection.Value.HasCompleteProduct(product);
         if (!flag & checkEquivalentProduct && product.HasEquivalentProductCodes)
         {
             foreach (string equivalentProductCode in product.EquivalentProductCodes)
             {
                 ProductModel productByCode = MoMDBManager.DB.GetProductByCode(equivalentProductCode);
-                if (productByCode != null && _collection.HasCompleteProduct(productByCode))
+                if (productByCode != null && Plugin.ConfigCollection.Value.HasCompleteProduct(productByCode))
                     return true;
             }
         }
@@ -108,25 +110,17 @@ public class UserCollectionManagerPatch
     [HarmonyPrefix]
     public static bool PreQuantity(ProductModel p, ref int __result)
     {
-        __result = _collection.HasCompleteProduct(p) ? 1 : 0;
+        __result = Plugin.ConfigCollection.Value.HasCompleteProduct(p) ? 1 : 0;
         return false;
     }
 
     public static void Setup()
     {
-        Plugin.ConfigCollection.SettingChanged += (object _, EventArgs _) => UpdateFromPluginConfig();
+        Plugin.ConfigCollection.SettingChanged += (object _, EventArgs _) => HandleCollectionChange();
     }
 
-    private static void SaveToPluginConfig()
+    private static void HandleCollectionChange()
     {
-        Plugin.ConfigCollection.Value = _collection.SaveToString();
-    }
-
-    private static void UpdateFromPluginConfig()
-    {
-        // Load _collection from config
-        var changeType = _collection.LoadFromString(Plugin.ConfigCollection.Value);
-
         // Fix in UI
         foreach (var collectionProduct in UI.Utilities.FindComponents<CollectionProduct>(false))
         {
@@ -148,9 +142,13 @@ public class UserCollectionManagerPatch
             scenarioSelectionController.LoadScenario(scenario);
         }
 
-        if (changeType.HasFlag(AdvancedUserCollection.ItemComponentTypes.Investigators))
+        foreach (var setupViewController in UI.Utilities.FindComponents<SetupViewController>(false))
         {
-            foreach (var setupViewController in UI.Utilities.FindComponents<SetupViewController>(false))
+            var investigatorSelectionManager = setupViewController.PanelInvestigatorSelect;
+            if (investigatorSelectionManager == null) continue;
+            var oldInvestigators = AvailableInvestigatorsRef(investigatorSelectionManager);
+            var newInvestigators = MoMDBManager.DB.GetAvailableInvestigators();
+            if (!oldInvestigators.SequenceEqual(newInvestigators))
             {
                 setupViewController.LoadInvestigators();
             }

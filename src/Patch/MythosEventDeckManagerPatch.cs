@@ -19,7 +19,7 @@ public class MythosEventDeckManagerPatch
 
         var effectiveCollection = AdvancedCollectionFacade.GetEffectiveCollectionForCurrentScenario();
         __result = model.RequiredProducts == null || effectiveCollection.HasAllProducts(model.RequiredProducts,
-            AdvancedUserCollection.ItemComponentTypes.MythosEvents);
+            ItemComponentTypes.MythosEvents);
         return false;
     }
 }

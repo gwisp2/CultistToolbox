@@ -15,26 +15,30 @@ namespace MoMEssentials
     {
         internal new static ManualLogSource Logger;
         internal static ConfigEntry<KeyboardShortcut> ConfigUiKey { get; set; }
-        internal static ConfigEntry<bool> ConfigLimitAvailableItems { get; set; }
         internal static ConfigEntry<bool> ConfigShowExpansionIcon { get; set; }
         internal static ConfigEntry<KeyboardShortcut> ConfigSkipPuzzleShortcut { get; set; }
-        internal static ConfigEntry<string> ConfigCollection { get; set; }
+        internal static ConfigEntry<AdvancedUserCollection> ConfigCollection { get; set; }
+        internal static ConfigEntry<ItemComponentTypes> ConfigScenarioRestrictedComponentTypes { get; set; }
 
         private void Awake()
         {
             // Plugin startup logic
             Logger = base.Logger;
             Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+            // Add TOML converters
+            AdvancedUserCollection.RegisterTomlConverter();
             // Configuration
             ConfigUiKey = Config.Bind("General", "UIKey", new KeyboardShortcut(KeyCode.F6));
-            ConfigLimitAvailableItems = Config.Bind("General", "LimitAvailableItems", false);
             ConfigShowExpansionIcon = Config.Bind("General", "ShowExpansionIcon", true);
             ConfigSkipPuzzleShortcut = Config.Bind("General", "SkipPuzzleKey", KeyboardShortcut.Empty);
-            ConfigCollection = Config.Bind("General", "Collection", "",
+            ConfigCollection = Config.Bind("General", "Collection", new AdvancedUserCollection(),
                 new ConfigDescription("available expansions", null,
                     new ConfigurationManagerAttributes
-                        { CustomDrawer = AdvancedCollectionManagerUi.DrawConfiguration }));
-            // Patch methods
+                        { CustomDrawer = AdvancedCollectionManagerUi.DrawCollectionEditor, HideDefaultButton = true }));
+            ConfigScenarioRestrictedComponentTypes = Config.Bind<ItemComponentTypes>("General",
+                "ScenarioRestrictedComponentTypes", ItemComponentTypes.None,
+                new ConfigDescription(
+                    "Use these components only from expansions that are required by a scenario")); // Patch methods
             var harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             harmony.PatchAll();
             // Make random deterministic

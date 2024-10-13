@@ -12,7 +12,6 @@ public class AdvancedCollectionManagerUi
     private static AdvancedCollectionManagerUi _instance;
     public static AdvancedCollectionManagerUi Instance => _instance ??= new AdvancedCollectionManagerUi();
 
-    private readonly AdvancedUserCollection _collection = new AdvancedUserCollection();
     private static readonly Color[] Colors = [Color.red, Color.yellow, Color.green];
 
     private Lazy<GUIStyle[]> _headerStyles = new(() => Colors.Select(color =>
@@ -20,7 +19,7 @@ public class AdvancedCollectionManagerUi
         var style = new GUIStyle(GUI.skin.label);
         style.normal.textColor = color;
         style.font = IconFontLocator.IconFont;
-        style.margin.top = 10;
+        style.margin.top = 20;
         return style;
     }).ToArray());
 
@@ -40,15 +39,16 @@ public class AdvancedCollectionManagerUi
 
     private void DrawCollectionEditorImpl(ConfigEntryBase entry)
     {
-        _collection.LoadFromString(entry.BoxedValue as string);
+        var typedEntry = ((ConfigEntry<AdvancedUserCollection>)entry);
+        var collection = typedEntry.Value.Copy();
         GUILayout.BeginVertical();
-        foreach (var item in _collection.Items)
+        foreach (var item in collection.Items)
         {
-            DrawItem(item, item.CanToggle);
+            DrawItem(item, item.ProductModel.CanToggle);
         }
 
         GUILayout.EndVertical();
-        entry.BoxedValue = _collection.SaveToString();
+        typedEntry.Value = collection.Freeze();
     }
 
     private void DrawEffectiveCollectionImpl()
@@ -66,7 +66,7 @@ public class AdvancedCollectionManagerUi
         GUILayout.EndVertical();
     }
 
-    private void DrawItem(AdvancedUserCollection.Item item, bool editable)
+    private void DrawItem(AdvancedUserCollectionItem item, bool editable)
     {
         int styleIndex = GetStyleIndex(item);
         var productTitle = Utilities.GetProductIcons(item.ProductModel) + " " + item.ProductModel.ProductName;
@@ -118,18 +118,47 @@ public class AdvancedCollectionManagerUi
         }
     }
 
-    private static int GetStyleIndex(AdvancedUserCollection.Item item)
+    private static int GetStyleIndex(AdvancedUserCollectionItem item)
     {
         int styleIndex = item.IsEverythingSelected ? 2 : item.IsAnythingSelected ? 1 : 0;
         return styleIndex;
     }
 
-    public static void DrawConfiguration(ConfigEntryBase entry)
+    public static void DrawCollectionEditor(ConfigEntryBase entry)
     {
         if (IsEditingAllowed())
             Instance.DrawCollectionEditorImpl(entry);
         else
             Instance.DrawEffectiveCollectionImpl();
+    }
+
+    public static void DrawScenarioRestrictedComponents(ConfigEntryBase entry)
+    {
+        var types = Plugin.ConfigScenarioRestrictedComponentTypes.Value;
+        GUILayout.BeginVertical();
+        if (entry.Description != null && !string.IsNullOrEmpty(entry.Description.Description))
+        {
+            GUILayout.Label(entry.Description.Description);
+        }
+
+        GUILayout.BeginHorizontal();
+        types = ComponentTypeToggle("Items", types, ItemComponentTypes.Items);
+        types = ComponentTypeToggle("Monsters", types, ItemComponentTypes.Monsters);
+        types = ComponentTypeToggle("Mythos", types, ItemComponentTypes.MythosEvents);
+        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+        if (IsEditingAllowed())
+        {
+            Plugin.ConfigScenarioRestrictedComponentTypes.Value = types;
+        }
+    }
+
+    private static ItemComponentTypes ComponentTypeToggle(string text, ItemComponentTypes types,
+        ItemComponentTypes flag)
+    {
+        var oldValue = types.HasFlag(flag);
+        var newValue = GUILayout.Toggle(oldValue, text);
+        return (types & ~flag) | (newValue ? flag : 0);
     }
 
     private static bool IsEditingAllowed()

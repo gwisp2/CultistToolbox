@@ -1,135 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using BepInEx.Configuration;
 
 namespace MoMEssentials.AdvancedCollectionManager;
 
 public class AdvancedUserCollection
 {
-    [Flags]
-    public enum ItemComponentTypes
+    private static readonly TypeConverter TypeConverter = new()
     {
-        Investigators = 1,
-        Items = 2,
-        Monsters = 4,
-        MythosEvents = 8,
-        Tiles = 16,
-        All = 31
+        ConvertToObject = (value, type) => new AdvancedUserCollection(value),
+        ConvertToString = (value, type) => ((AdvancedUserCollection)value).SaveToString()
+    };
+
+    public static void RegisterTomlConverter()
+    {
+        TomlTypeConverter.AddConverter(typeof(AdvancedUserCollection), TypeConverter);
     }
 
-    public class Item(ProductModel productModel)
-    {
-        private ItemComponentTypes _presentComponents = !productModel.CanToggle ? ItemComponentTypes.All : 0;
-        public ProductModel ProductModel { get; } = productModel;
-        public bool CanToggle => ProductModel.CanToggle;
-
-        public bool HasInvestigators
-        {
-            get => AllPresent(ItemComponentTypes.Investigators);
-            set => Set(ItemComponentTypes.Investigators, value);
-        }
-
-        public bool HasMonsters
-        {
-            get => AllPresent(ItemComponentTypes.Monsters);
-            set => Set(ItemComponentTypes.Monsters, value);
-        }
-
-        public bool HasItems
-        {
-            get => AllPresent(ItemComponentTypes.Items);
-            set => Set(ItemComponentTypes.Items, value);
-        }
-
-        public bool HasMythosEvents
-        {
-            get => AllPresent(ItemComponentTypes.MythosEvents);
-            set => Set(ItemComponentTypes.MythosEvents, value);
-        }
-
-        public bool HasTiles
-        {
-            get => AllPresent(ItemComponentTypes.Tiles);
-            set => Set(ItemComponentTypes.Tiles, value);
-        }
-
-        public bool AllPresent(ItemComponentTypes types)
-        {
-            return (_presentComponents & types) == types;
-        }
-
-        private ItemComponentTypes Set(ItemComponentTypes types, bool present)
-        {
-            if (!CanToggle)
-                return 0;
-
-            var oldValue = _presentComponents;
-            if (present)
-            {
-                _presentComponents |= types;
-            }
-            else
-            {
-                _presentComponents &= ~types;
-            }
-
-            return oldValue ^ _presentComponents;
-        }
-
-        public void SetEverything(bool value)
-        {
-            Set(ItemComponentTypes.All, value);
-        }
-
-        public bool IsAnythingSelected => _presentComponents != 0;
-        public bool IsEverythingSelected => _presentComponents == ItemComponentTypes.All;
-
-        public string SaveToString()
-        {
-            return FormatBool(HasItems, "i") + FormatBool(HasMonsters, "m") + FormatBool(HasInvestigators, "I") +
-                   FormatBool(HasMythosEvents, "M") + FormatBool(HasTiles, "t");
-        }
-
-        public ItemComponentTypes LoadFromString(string value)
-        {
-            if (!CanToggle) return 0;
-            ItemComponentTypes target = 0;
-            target |= value.Contains("i") ? ItemComponentTypes.Items : 0;
-            target |= value.Contains("m") ? ItemComponentTypes.Monsters : 0;
-            target |= value.Contains("I") ? ItemComponentTypes.Investigators : 0;
-            target |= value.Contains("M") ? ItemComponentTypes.MythosEvents : 0;
-            target |= value.Contains("t") ? ItemComponentTypes.Tiles : 0;
-            var changeMask = _presentComponents & target;
-            _presentComponents = target;
-            return changeMask;
-        }
-
-        private string FormatBool(bool value, string letter) => value ? letter : "";
-    }
-
-    private List<Item> _items;
-    public IReadOnlyList<Item> Items => _items.AsReadOnly();
+    private List<AdvancedUserCollectionItem> _items = new();
+    public IReadOnlyList<AdvancedUserCollectionItem> Items => _items.AsReadOnly();
 
     public AdvancedUserCollection()
     {
-        _items = MoMDBManager.DB.GetProducts().OrderBy(p => p.ProductCode)
-            .Select(p => new Item(p)).ToList();
         Reset();
+    }
+
+    public AdvancedUserCollection(AdvancedUserCollection other)
+    {
+        _items = other._items.Select(i => new AdvancedUserCollectionItem(i)).ToList();
     }
 
     public AdvancedUserCollection(string value) : this()
     {
-        this.LoadFromString(value);
+        LoadFromString(value);
     }
 
-    public void AddCompleteProduct(ProductModel product)
+    public AdvancedUserCollection AddCompleteProduct(ProductModel product)
     {
         Get(product.ProductCode).SetEverything(true);
+        return this;
     }
 
-    public void RemoveProduct(ProductModel product)
+    public AdvancedUserCollection AddEmptyProduct(ProductModel product)
+    {
+        GetOrCreate(product.ProductCode);
+        return this;
+    }
+
+
+    public AdvancedUserCollection RemoveProduct(ProductModel product)
     {
         Get(product.ProductCode).SetEverything(false);
+        return this;
     }
 
     public Dictionary<ProductModel, int> GetCompleteProductQuantities()
@@ -137,12 +59,24 @@ public class AdvancedUserCollection
         return _items.ToDictionary(i => i.ProductModel, i => i.IsEverythingSelected ? 1 : 0);
     }
 
-    public Item Get(string productCode)
+    public AdvancedUserCollectionItem Get(string productCode)
     {
         return _items.FirstOrDefault(item => item.ProductModel.ProductCode == productCode);
     }
 
-    public Item Get(ProductModel productModel)
+    private AdvancedUserCollectionItem GetOrCreate(string productCode)
+    {
+        var item = Get(productCode);
+        if (item == null)
+        {
+            item = new AdvancedUserCollectionItem(productCode);
+            _items.Add(item);
+        }
+
+        return item;
+    }
+
+    public AdvancedUserCollectionItem Get(ProductModel productModel)
     {
         return Get(productModel.ProductCode);
     }
@@ -161,42 +95,38 @@ public class AdvancedUserCollection
     {
         var itemsInCollection = _items.Where(i => i.IsAnythingSelected).ToList();
         return string.Join(",",
-            itemsInCollection.Select(item => item.ProductModel.ProductCode + ":" + item.SaveToString()));
+            itemsInCollection.Select(item => item.ProductCode + ":" + item.SaveToString()));
     }
 
     public void Reset()
     {
-        foreach (var item in _items)
-        {
-            if (!item.CanToggle) continue;
-            item.SetEverything(!item.ProductModel.CanToggle);
-        }
+        _items.Clear();
+        _items.Add(new AdvancedUserCollectionItem("MAD20", ItemComponentTypes.All));
     }
 
-    public ItemComponentTypes LoadFromString(string value)
+    public void LoadFromString(string value)
     {
-        ItemComponentTypes changeType = 0;
-        var valueAsDict = new Dictionary<string, string>();
+        Reset();
         foreach (var parts in value.Split([',']))
         {
             var kv = parts.Split([':'], 2);
             if (kv.Length != 2) continue;
-            valueAsDict[kv[0]] = kv[1];
+            GetOrCreate(kv[0]).LoadFromString(kv[1]);
         }
+    }
 
+    public AdvancedUserCollection Freeze()
+    {
         foreach (var item in _items)
         {
-            if (!item.CanToggle) continue;
-            if (valueAsDict.TryGetValue(item.ProductModel.ProductCode, out var v))
-            {
-                changeType |= item.LoadFromString(v);
-            }
-            else
-            {
-                changeType |= item.LoadFromString("");
-            }
+            item.Freeze();
         }
 
-        return changeType;
+        return this;
+    }
+
+    public AdvancedUserCollection Copy()
+    {
+        return new AdvancedUserCollection(this);
     }
 }
