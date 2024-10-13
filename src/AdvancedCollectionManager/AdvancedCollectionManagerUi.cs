@@ -141,7 +141,8 @@ public class AdvancedCollectionManagerUi
 
     public static void DrawScenarioRestrictedComponents(ConfigEntryBase entry)
     {
-        var types = Plugin.ConfigScenarioRestrictedComponentTypes.Value;
+        var typedEntry = ((ConfigEntry<ItemComponentTypes>)entry);
+        ItemComponentTypes types = typedEntry.Value;
         GUILayout.BeginVertical();
         if (entry.Description != null && !string.IsNullOrEmpty(entry.Description.Description))
         {
@@ -156,7 +157,7 @@ public class AdvancedCollectionManagerUi
         GUILayout.EndVertical();
         if (IsEditingAllowed())
         {
-            Plugin.ConfigScenarioRestrictedComponentTypes.Value = types;
+            typedEntry.Value = types;
         }
     }
 

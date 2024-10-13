@@ -35,10 +35,20 @@ namespace MoMEssentials
                 new ConfigDescription("available expansions", null,
                     new ConfigurationManagerAttributes
                         { CustomDrawer = AdvancedCollectionManagerUi.DrawCollectionEditor, HideDefaultButton = true }));
-            ConfigScenarioRestrictedComponentTypes = Config.Bind<ItemComponentTypes>("General",
-                "ScenarioRestrictedComponentTypes", ItemComponentTypes.None,
+
+            var restrictableTypes =
+                ItemComponentTypes.Items | ItemComponentTypes.Monsters | ItemComponentTypes.MythosEvents;
+            ConfigScenarioRestrictedComponentTypes = Config.Bind(
+                section: "General",
+                key: "ScenarioRestrictedComponentTypes",
+                defaultValue: ItemComponentTypes.None,
                 new ConfigDescription(
-                    "Use these components only from expansions that are required by a scenario")); // Patch methods
+                    "Use these components only from expansions that are required by a scenario",
+                    new AcceptableValueFlags<ItemComponentTypes>(restrictableTypes),
+                    new ConfigurationManagerAttributes()
+                    {
+                        CustomDrawer = AdvancedCollectionManagerUi.DrawScenarioRestrictedComponents
+                    })); // Patch methods
             var harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
             harmony.PatchAll();
             // Make random deterministic
