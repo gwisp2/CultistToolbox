@@ -7,6 +7,7 @@ public class EssentialsUI : MonoBehaviour
 {
     private readonly ItemListUI _itemListUI = new();
     private readonly TileListUI _tileListUI = new();
+    private readonly InvestigatorMagicUI _investigatorMagicUI = new();
     private bool _visible;
     private float _keyUnblockTime = 0;
 
@@ -27,6 +28,7 @@ public class EssentialsUI : MonoBehaviour
 
         _itemListUI.OnGUI();
         _tileListUI.OnGUI();
+        _investigatorMagicUI.OnGUI();
         _tileListUI.OnGUISecondPass();
         _itemListUI.OnGUISecondPass();
     }

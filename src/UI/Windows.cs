@@ -9,9 +9,11 @@ namespace MoMEssentials.UI
         public const int TileTooltipWindowId = 11;
         public const int ItemsWindowId = 20;
         public const int ItemTooltipWindowId = 21;
+        public const int InvestigatorsWindowId = 30;
 
         // Default window positions
         public static readonly Rect TilesWindowRect = new(10, 10, 400, 400);
         public static readonly Rect ItemsWindowRect = new(430, 10, 400, 400);
+        public static readonly Rect InvestigatorsWindowRect = new(830, 10, 400, 400);
     }
 }
