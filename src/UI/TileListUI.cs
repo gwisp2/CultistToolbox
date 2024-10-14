@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MoMEssentials.UI;
 
-public class TileListUI
+public class TileListUI : Renderable
 {
     private class TileInfo
     {
@@ -76,18 +76,19 @@ public class TileListUI
             .ToList();
     }
 
-    public void OnGUI()
+    public override void RenderFirstPass()
     {
         _window.RenderWindow();
     }
 
-    public void OnGUISecondPass()
+    public override void RenderSecondPass()
     {
         _tooltipWindow.OnGUI();
     }
 
     private void DrawWindowContent()
     {
+        if (!GameData.IsInitialized) return;
         _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
         _tooltipWindow.Hide();
         foreach (var tile in _tiles)

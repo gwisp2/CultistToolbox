@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MoMEssentials.UI;
 
-public class ItemListUI
+public class ItemListUI : Renderable
 {
     private Vector2 _scrollPosition;
     private List<ItemModel> _potentialItems = new();
@@ -49,18 +49,19 @@ public class ItemListUI
         MoMEssentials.Utilities.Shuffle(_potentialItems);
     }
 
-    public void OnGUI()
+    public override void RenderFirstPass()
     {
         _window.RenderWindow();
     }
 
-    public void OnGUISecondPass()
+    public override void RenderSecondPass()
     {
         _tooltipWindow.OnGUI();
     }
 
     private void DrawWindowContent()
     {
+        if (!GameData.IsInitialized) return;
         _tooltipWindow.Hide();
         _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
         var items = _potentialItems;

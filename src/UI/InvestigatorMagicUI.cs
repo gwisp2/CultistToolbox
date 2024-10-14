@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace MoMEssentials.UI;
 
-public class InvestigatorMagicUI
+public class InvestigatorMagicUI : Renderable
 {
     private static readonly FieldInfo SModelField =
         typeof(GameData).GetField("s_model", BindingFlags.NonPublic | BindingFlags.Static);
@@ -32,7 +32,7 @@ public class InvestigatorMagicUI
     {
     }
 
-    public void OnGUI()
+    public override void RenderFirstPass()
     {
         _window.RenderWindow();
     }
@@ -49,23 +49,6 @@ public class InvestigatorMagicUI
     private void DrawWindowContent()
     {
         if (!GameData.IsInitialized) return;
-
-        if (GUILayout.Button("Reposition"))
-        {
-            foreach (var transition in Utilities.FindComponents<MoM_GamePhaseTransition>())
-            {
-                transition.InvestigatorTable.hideInactive = false;
-                transition.InvestigatorTable.Reposition();
-            }
-        }
-
-        if (GUILayout.Button("Install"))
-        {
-            foreach (var transition in Utilities.FindComponents<MoM_GamePhaseTransition>())
-            {
-                transition.BeginInvestigatorPhase();
-            }
-        }
 
         var investigators = MoM_InvestigatorManager.Investigators;
         if (investigators == null || investigators.Count == 0) return;
