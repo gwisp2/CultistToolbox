@@ -72,5 +72,6 @@ public class EssentialsUI : MonoBehaviour
     {
         _tileListUI.Update();
         _itemListUI.Update();
+        _investigatorMagicUI.Update();
     }
 }

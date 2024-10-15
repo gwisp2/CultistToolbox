@@ -8,6 +8,7 @@ public static class Common
     public static readonly Lazy<GUIStyle> LabelStyle = new(CreateLabelStyle);
     public static readonly Lazy<GUIStyle> HighlightLabelStyle = new(CreateHighlightLabelStyle);
     public static readonly Lazy<GUIStyle> HighlightOnHoverLabelStyle = new(CreateHighlightOnHoverLabelStyle);
+    public static readonly Lazy<GUIStyle> WarningLabelStyle = new(CreateWarningLabelStyle);
 
     private static GUIStyle CreateLabelStyle()
     {
@@ -28,6 +29,13 @@ public static class Common
     {
         var style = CreateLabelStyle();
         style.hover.textColor = Color.green;
+        return style;
+    }
+
+    private static GUIStyle CreateWarningLabelStyle()
+    {
+        var style = CreateLabelStyle();
+        style.normal.textColor = Color.yellow;
         return style;
     }
 }

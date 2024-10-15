@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Reflection;
 using FFG.MoM;
+using FFG.MoM.Actions;
 using HarmonyLib;
+using MoMEssentials.Patch;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -10,6 +12,9 @@ namespace MoMEssentials.UI;
 
 public class InvestigatorMagicUI : Renderable
 {
+    private static bool _scenarioHasGetInvestigatorId;
+    private static ScenarioVariant _scenarioVariant;
+
     private static readonly FieldInfo SModelField =
         typeof(GameData).GetField("s_model", BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -30,6 +35,8 @@ public class InvestigatorMagicUI : Renderable
 
     public void Update()
     {
+        _scenarioHasGetInvestigatorId = Utilities.EnumerateAllActions<GetInvestigatorId>().Any();
+        _scenarioVariant = CurrentScenarioVariantPatch.CurrentScenarioVariant;
     }
 
     public override void RenderFirstPass()
@@ -49,6 +56,12 @@ public class InvestigatorMagicUI : Renderable
     private void DrawWindowContent()
     {
         if (!GameData.IsInitialized) return;
+
+        if (_scenarioHasGetInvestigatorId && GameData.ScenarioVariant == _scenarioVariant)
+        {
+            GUILayout.Label("Warning: this scenario remembers investigators names and will break if you change them!",
+                Common.WarningLabelStyle.Value);
+        }
 
         var investigators = MoM_InvestigatorManager.Investigators;
         if (investigators == null || investigators.Count == 0) return;
