@@ -229,9 +229,9 @@ public class LocalizationPredictor
     {
         var availableItems = _itemPool.Filter(insert.IncludeItemTraits, insert.ExcludeItemTraits, insert.ItemFilter);
         var spawnPriorities = DeterministicRandomFacade.SortElementsByRandomPriority(availableItems);
-        if (spawnPriorities.Count > 1)
+        if (spawnPriorities.Count >= 1)
         {
-            var item = _spawnedItems[0];
+            var item = spawnPriorities[0];
             _spawnedItems.Add(item);
             _itemSpawnPriorities.Add(new ItemSpawnPriorities(spawnPriorities));
             _itemPool.Remove(item);
