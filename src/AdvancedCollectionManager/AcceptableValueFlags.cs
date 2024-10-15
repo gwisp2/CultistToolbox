@@ -19,7 +19,6 @@ public class AcceptableValueFlags<T> : AcceptableValueBase
 
     public override object Clamp(object value)
     {
-        Plugin.Logger.LogWarning($"Clamping {value}");
         var v = (T)value;
         var allowed = _allowedFlags;
         var vInt = Convert.ToInt64(v);
