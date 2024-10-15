@@ -179,7 +179,7 @@ public class ActionE
                 return new
                 {
                     Filter = ExportEnum(insert.Filter),
-                    Id = insert.VariableInt.Value
+                    Id = ExportValue(fsm, insert.VariableInt)
                 };
             }
             else
