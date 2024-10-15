@@ -73,61 +73,61 @@ public class AdvancedCollectionManagerUi
         GUILayout.Label("", _headerStyles.Value[0]); // just for margin
     }
 
-    private void DrawItem(AdvancedUserCollectionItem item, bool editable)
+    private void DrawItem(AdvancedUserCollectionProduct product, bool editable)
     {
-        int styleIndex = GetStyleIndex(item);
-        var productTitle = Utilities.GetProductIcons(item.ProductModel) + " " + item.ProductModel.ProductName;
+        int styleIndex = GetStyleIndex(product);
+        var productTitle = Utilities.GetProductIcons(product.ProductModel) + " " + product.ProductModel.ProductName;
         GUILayout.Label(productTitle, _headerStyles.Value[styleIndex]);
         if (editable)
         {
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Select all", _buttonStyles.Value[styleIndex]))
             {
-                item.SetEverything(true);
+                product.SetEverything(true);
             }
             else if (GUILayout.Button("Select none", _buttonStyles.Value[styleIndex]))
             {
-                item.SetEverything(false);
+                product.SetEverything(false);
             }
 
             GUILayout.EndHorizontal();
         }
 
-        var nInvestigators = item.ProductModel.Investigators.Count;
-        var nItems = item.ProductModel.Items.Count;
-        var nMonsters = item.ProductModel.Monsters.Count;
-        var nTiles = item.ProductModel.TileQuantity;
-        var nMythos = item.ProductModel.CanToggle
+        var nInvestigators = product.ProductModel.Investigators.Count;
+        var nItems = product.ProductModel.Items.Count;
+        var nMonsters = product.ProductModel.Monsters.Count;
+        var nTiles = product.ProductModel.TileQuantity;
+        var nMythos = product.ProductModel.CanToggle
             ? MoMDBManager.DB.MythosEvents.Count(e =>
-                e.RequiredProducts != null && e.RequiredProducts.Contains(item.ProductModel))
+                e.RequiredProducts != null && e.RequiredProducts.Contains(product.ProductModel))
             : MoMDBManager.DB.MythosEvents.Count(e =>
                 e.RequiredProducts == null || !e.RequiredProducts.Any() ||
-                (e.RequiredProducts != null && e.RequiredProducts.Contains(item.ProductModel)));
+                (e.RequiredProducts != null && e.RequiredProducts.Contains(product.ProductModel)));
         GUILayout.BeginHorizontal();
-        bool hasInvestigators = GUILayout.Toggle(item.HasInvestigators, $"Investigators ({nInvestigators})",
+        bool hasInvestigators = GUILayout.Toggle(product.HasInvestigators, $"Investigators ({nInvestigators})",
             _toggleStyles.Value[styleIndex]);
-        bool hasItems = GUILayout.Toggle(item.HasItems, $"Items ({nItems})", _toggleStyles.Value[styleIndex]);
+        bool hasItems = GUILayout.Toggle(product.HasItems, $"Items ({nItems})", _toggleStyles.Value[styleIndex]);
         bool hasMonsters =
-            GUILayout.Toggle(item.HasMonsters, $"Monsters ({nMonsters})", _toggleStyles.Value[styleIndex]);
+            GUILayout.Toggle(product.HasMonsters, $"Monsters ({nMonsters})", _toggleStyles.Value[styleIndex]);
         GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
-        bool hasMythos = GUILayout.Toggle(item.HasMythosEvents, $"Mythos events ({nMythos})",
+        bool hasMythos = GUILayout.Toggle(product.HasMythosEvents, $"Mythos events ({nMythos})",
             _toggleStyles.Value[styleIndex]);
-        bool hasTiles = GUILayout.Toggle(item.HasTiles, $"Tiles ({nTiles})", _toggleStyles.Value[styleIndex]);
+        bool hasTiles = GUILayout.Toggle(product.HasTiles, $"Tiles ({nTiles})", _toggleStyles.Value[styleIndex]);
         GUILayout.EndHorizontal();
         if (editable)
         {
-            item.HasInvestigators = hasInvestigators;
-            item.HasItems = hasItems;
-            item.HasMonsters = hasMonsters;
-            item.HasMythosEvents = hasMythos;
-            item.HasTiles = hasTiles;
+            product.HasInvestigators = hasInvestigators;
+            product.HasItems = hasItems;
+            product.HasMonsters = hasMonsters;
+            product.HasMythosEvents = hasMythos;
+            product.HasTiles = hasTiles;
         }
     }
 
-    private static int GetStyleIndex(AdvancedUserCollectionItem item)
+    private static int GetStyleIndex(AdvancedUserCollectionProduct product)
     {
-        int styleIndex = item.IsEverythingSelected ? 2 : item.IsAnythingSelected ? 1 : 0;
+        int styleIndex = product.IsEverythingSelected ? 2 : product.IsAnythingSelected ? 1 : 0;
         return styleIndex;
     }
 

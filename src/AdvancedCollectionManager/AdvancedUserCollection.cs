@@ -17,8 +17,8 @@ public class AdvancedUserCollection
         TomlTypeConverter.AddConverter(typeof(AdvancedUserCollection), TypeConverter);
     }
 
-    private List<AdvancedUserCollectionItem> _items = new();
-    public IReadOnlyList<AdvancedUserCollectionItem> Items => _items.AsReadOnly();
+    private List<AdvancedUserCollectionProduct> _items = new();
+    public IReadOnlyList<AdvancedUserCollectionProduct> Items => _items.AsReadOnly();
 
     public AdvancedUserCollection()
     {
@@ -27,7 +27,7 @@ public class AdvancedUserCollection
 
     public AdvancedUserCollection(AdvancedUserCollection other)
     {
-        _items = other._items.Select(i => new AdvancedUserCollectionItem(i)).ToList();
+        _items = other._items.Select(i => new AdvancedUserCollectionProduct(i)).ToList();
     }
 
     public AdvancedUserCollection(string value) : this()
@@ -59,24 +59,24 @@ public class AdvancedUserCollection
         return _items.ToDictionary(i => i.ProductModel, i => i.IsEverythingSelected ? 1 : 0);
     }
 
-    public AdvancedUserCollectionItem Get(string productCode)
+    public AdvancedUserCollectionProduct Get(string productCode)
     {
         return _items.FirstOrDefault(item => item.ProductModel.ProductCode == productCode);
     }
 
-    private AdvancedUserCollectionItem GetOrCreate(string productCode)
+    private AdvancedUserCollectionProduct GetOrCreate(string productCode)
     {
         var item = Get(productCode);
         if (item == null)
         {
-            item = new AdvancedUserCollectionItem(productCode);
+            item = new AdvancedUserCollectionProduct(productCode);
             _items.Add(item);
         }
 
         return item;
     }
 
-    public AdvancedUserCollectionItem Get(ProductModel productModel)
+    public AdvancedUserCollectionProduct Get(ProductModel productModel)
     {
         return Get(productModel.ProductCode);
     }
@@ -101,7 +101,7 @@ public class AdvancedUserCollection
     public void Reset()
     {
         _items.Clear();
-        _items.Add(new AdvancedUserCollectionItem("MAD20", ItemComponentTypes.All));
+        _items.Add(new AdvancedUserCollectionProduct("MAD20", ItemComponentTypes.All));
     }
 
     public void LoadFromString(string value)

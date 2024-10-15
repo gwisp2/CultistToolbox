@@ -5,6 +5,10 @@ namespace MoMEssentials.AdvancedCollectionManager;
 
 public static class AdvancedCollectionFacade
 {
+    private static AdvancedUserCollection _effectiveCollection;
+    private static AdvancedUserCollection _lastCollection;
+    private static ScenarioVariant _lastScenarioVariant;
+
     public static AdvancedUserCollection GetCurrentAdvancedUserCollection()
     {
         return Plugin.ConfigCollection.Value;
@@ -12,6 +16,9 @@ public static class AdvancedCollectionFacade
 
     public static AdvancedUserCollection GetEffectiveCollectionForCurrentScenario()
     {
+        if (_lastCollection == Plugin.ConfigCollection.Value &&
+            _lastScenarioVariant == CurrentScenarioVariantPatch.CurrentScenarioVariant) return _effectiveCollection;
+
         var collection = GetCurrentAdvancedUserCollection();
         var scenarioVariant = CurrentScenarioVariantPatch.CurrentScenarioVariant;
         if (scenarioVariant == null)
@@ -20,16 +27,27 @@ public static class AdvancedCollectionFacade
             return collection;
         }
 
-        // Remove items that are not required in this scenario
-        if (Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.Items))
+        // Remove items from products that are not required in the current scenario
+        var collectionCopy = collection.Copy();
+        var isFilteringItems = Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.Items);
+        var isFilteringMonsters =
+            Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.Monsters);
+        if (isFilteringItems || isFilteringMonsters)
         {
-            foreach (var collectionItem in collection.Items)
+            foreach (var collectionItem in collectionCopy.Items)
             {
-                if (collectionItem.ProductModel.CanToggle &&
-                    !scenarioVariant.RequiredAdditionalProducts.Contains(collectionItem.ProductModel))
+                if (!collectionItem.ProductModel.CanToggle ||
+                    scenarioVariant.RequiredAdditionalProducts.Contains(collectionItem.ProductModel)) continue;
+                if (isFilteringItems)
                     collectionItem.HasItems = false;
+                if (isFilteringMonsters)
+                    collectionItem.HasMonsters = false;
             }
         }
+
+        _lastCollection = collection;
+        _lastScenarioVariant = scenarioVariant;
+        _effectiveCollection = collectionCopy.Freeze();
 
         return collection;
     }

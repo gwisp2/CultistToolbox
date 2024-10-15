@@ -1,13 +1,15 @@
 ﻿namespace MoMEssentials.AdvancedCollectionManager;
 
-public class AdvancedUserCollectionItem(string productCode, ItemComponentTypes componentTypes = ItemComponentTypes.None)
+public class AdvancedUserCollectionProduct(
+    string productCode,
+    ItemComponentTypes componentTypes = ItemComponentTypes.None)
 {
     public string ProductCode { get; } = productCode;
     public bool IsFrozen { get; private set; }
 
     private ItemComponentTypes _presentComponents = componentTypes;
 
-    public AdvancedUserCollectionItem(AdvancedUserCollectionItem other) : this(other.ProductCode)
+    public AdvancedUserCollectionProduct(AdvancedUserCollectionProduct other) : this(other.ProductCode)
     {
         _presentComponents = other._presentComponents;
     }
@@ -51,7 +53,11 @@ public class AdvancedUserCollectionItem(string productCode, ItemComponentTypes c
 
     public void Set(ItemComponentTypes types, bool present)
     {
-        if (IsFrozen) return;
+        if (IsFrozen)
+        {
+            Plugin.Logger.LogWarning($"AdvancedUserCollectionProduct: Set() called on the frozen product");
+            return;
+        }
 
         if (present)
         {
@@ -78,7 +84,13 @@ public class AdvancedUserCollectionItem(string productCode, ItemComponentTypes c
 
     public ItemComponentTypes LoadFromString(string value)
     {
-        if (!IsFrozen) return 0;
+        if (IsFrozen)
+        {
+            Plugin.Logger.LogWarning(
+                $"AdvancedUserCollectionProduct: LoadFromString() called on the frozen collection product");
+            return ItemComponentTypes.None;
+        }
+
         ItemComponentTypes target = ItemComponentTypesExtensions.FromShortString(value);
         var changeMask = _presentComponents & target;
         _presentComponents = target;
