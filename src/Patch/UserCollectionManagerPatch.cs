@@ -121,6 +121,13 @@ public class UserCollectionManagerPatch
 
     private static void HandleCollectionChange()
     {
+        // Sync plugin-managed collection with the game-managed collection
+        foreach (var productModel in MoMDBManager.DB.GetProducts())
+        {
+            FFGPlayerPrefs.SetInt(productModel.ProductCode,
+                Plugin.ConfigCollection.Value.HasCompleteProduct(productModel) ? 1 : 0);
+        }
+
         // Fix in UI
         foreach (var collectionProduct in UI.Utilities.FindComponents<CollectionProduct>(false))
         {
