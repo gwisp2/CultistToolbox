@@ -10,6 +10,7 @@ public class EssentialsUI : MonoBehaviour
     private readonly ItemListUI _itemListUI = new();
     private readonly TileListUI _tileListUI = new();
     private readonly InvestigatorMagicUI _investigatorMagicUI = new();
+    private readonly FsmToolsUI _fsmToolsUI = new();
     private readonly List<Renderable> _renderables = new();
     private bool _visible;
     private float _keyUnblockTime = 0;
@@ -46,6 +47,7 @@ public class EssentialsUI : MonoBehaviour
         DrawToggleButton("Tiles", _tileListUI);
         DrawToggleButton("Items", _itemListUI);
         DrawToggleButton("Investigators", _investigatorMagicUI);
+        DrawToggleButton("FSM tools", _fsmToolsUI);
     }
 
     private void DrawToggleButton(string text, Renderable renderable)

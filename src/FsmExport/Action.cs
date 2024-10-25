@@ -38,10 +38,18 @@ public class ActionE
             parameters[fieldInfo.Name] = ExportValue(fsm, fieldInfo.GetValue(a));
         }
 
+        if (a is FsmOwnerDefault)
+        {
+            foreach (var propertyInfo in a.GetType().GetProperties())
+            {
+                parameters[propertyInfo.Name] = ExportValue(fsm, propertyInfo.GetValue(a));
+            }
+        }
+
         return new
         {
-            Type = a.GetType(),
-            Parameters = parameters
+            Type = a.GetType().FullName,
+            Fields = parameters
         };
     }
 
@@ -81,7 +89,7 @@ public class ActionE
         {
             return new
             {
-                Type = component.GetType(),
+                Type = component.GetType().FullName,
                 At = component.gameObject.GetFullName()
             };
         }
@@ -90,7 +98,7 @@ public class ActionE
         {
             return new
             {
-                Type = value.GetType(),
+                Type = value.GetType().FullName,
                 MonsterType = monsterModel.Type.name,
                 NameKey = monsterModel.Name.Key,
                 name = Localization.Get(monsterModel.name),
@@ -321,13 +329,49 @@ public class StateE
 public class FsmE
 {
     public string OwnerFullName;
+    public string StartState;
     public List<StateE> States;
+    public List<TransitionE> GlobalTransitions;
 
     public static FsmE FromFsm(Fsm fsm)
     {
         var exported = new FsmE();
+        exported.StartState = fsm.StartState;
         exported.OwnerFullName = fsm.Owner?.gameObject?.GetFullName();
         exported.States = fsm.States.Select(s => StateE.FromFsmState(exported, s)).ToList();
+        exported.GlobalTransitions = fsm.GlobalTransitions.Select(s => new TransitionE()
+            { DestinationStateName = s.ToState, EventName = s.EventName }).ToList();
         return exported;
     }
+}
+
+public struct XY
+{
+    public float X;
+    public float Y;
+
+    public static XY FromVec2(Vector2 vec)
+    {
+        return new XY() { X = vec.x, Y = vec.y };
+    }
+
+    public static XY FromVec3(Vector3 vec)
+    {
+        return new XY() { X = vec.x, Y = vec.y };
+    }
+}
+
+public class TileE
+{
+    public string FullName;
+    public string TextureName;
+    public XY Position;
+    public XY Extents;
+    public float RotationAngle;
+}
+
+public class ScenarioE
+{
+    public Dictionary<string, FsmE> Fsms = new();
+    public List<TileE> Tiles = new();
 }
