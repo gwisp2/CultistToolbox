@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace MoMEssentials.DeterministicRandom;
+namespace CultistToolbox.DeterministicRandom;
 
 public class ItemSpawnPriorities
 {

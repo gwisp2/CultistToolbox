@@ -2,7 +2,7 @@
 using System.Linq;
 using BepInEx.Configuration;
 
-namespace MoMEssentials.AdvancedCollectionManager;
+namespace CultistToolbox.AdvancedCollectionManager;
 
 public class AdvancedUserCollection
 {

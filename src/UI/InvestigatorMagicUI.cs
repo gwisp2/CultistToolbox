@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CultistToolbox.Patch;
 using FFG.MoM;
 using FFG.MoM.Actions;
 using HarmonyLib;
-using MoMEssentials.Patch;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace MoMEssentials.UI;
+namespace CultistToolbox.UI;
 
 public class InvestigatorMagicUI : Renderable
 {

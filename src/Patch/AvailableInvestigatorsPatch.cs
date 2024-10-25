@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CultistToolbox.AdvancedCollectionManager;
 using HarmonyLib;
-using MoMEssentials.AdvancedCollectionManager;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch(typeof(MoMDatabase))]
 public class AvailableInvestigatorsPatch

@@ -1,9 +1,9 @@
 ﻿using System.Linq;
+using CultistToolbox.FsmTools;
 using HutongGames.PlayMaker;
-using MoMEssentials.FsmTools;
 using UnityEngine;
 
-namespace MoMEssentials.UI;
+namespace CultistToolbox.UI;
 
 public class FsmToolsUI : Renderable
 {

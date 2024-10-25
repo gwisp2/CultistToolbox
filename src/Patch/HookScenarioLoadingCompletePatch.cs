@@ -2,7 +2,7 @@
 using FFG.MoM;
 using HarmonyLib;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch(typeof(TransitionController), nameof(TransitionController.LoadingComplete))]
 public class HookScenarioLoadingCompletePatch

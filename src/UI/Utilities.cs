@@ -5,7 +5,7 @@ using HutongGames.PlayMaker;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace MoMEssentials.UI;
+namespace CultistToolbox.UI;
 
 public static class Utilities
 {

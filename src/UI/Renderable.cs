@@ -1,4 +1,4 @@
-﻿namespace MoMEssentials.UI;
+﻿namespace CultistToolbox.UI;
 
 public abstract class Renderable
 {

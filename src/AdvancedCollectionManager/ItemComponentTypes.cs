@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
 
-namespace MoMEssentials.AdvancedCollectionManager;
+namespace CultistToolbox.AdvancedCollectionManager;
 
 [Flags]
 public enum ItemComponentTypes

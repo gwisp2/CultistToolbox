@@ -2,7 +2,7 @@
 using System.Linq;
 using FFG.MoM;
 
-namespace MoMEssentials.DeterministicRandom;
+namespace CultistToolbox.DeterministicRandom;
 
 public static class Extensions
 {

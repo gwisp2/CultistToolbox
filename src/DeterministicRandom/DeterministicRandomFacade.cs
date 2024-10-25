@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using HutongGames.PlayMaker;
 
-namespace MoMEssentials.DeterministicRandom;
+namespace CultistToolbox.DeterministicRandom;
 
 public class DeterministicRandomFacade
 {

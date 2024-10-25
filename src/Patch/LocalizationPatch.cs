@@ -1,7 +1,7 @@
 ﻿using System;
 using HarmonyLib;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch(typeof(Localization), nameof(Localization.Get), [typeof(string), typeof(bool)])]
 public class LocalizationPatch

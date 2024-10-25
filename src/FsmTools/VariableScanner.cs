@@ -5,7 +5,7 @@ using FFG.Common.Actions;
 using FFG.MoM.Actions;
 using HutongGames.PlayMaker;
 
-namespace MoMEssentials.FsmTools;
+namespace CultistToolbox.FsmTools;
 
 public class VariableScanner
 {

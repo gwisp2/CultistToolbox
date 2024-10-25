@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using BepInEx.Configuration;
 
-namespace MoMEssentials.AdvancedCollectionManager;
+namespace CultistToolbox.AdvancedCollectionManager;
 
 public class AcceptableValueFlags<T> : AcceptableValueBase
     where T : Enum

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 
-namespace MoMEssentials;
+namespace CultistToolbox;
 
 public class ItemDatabase
 {

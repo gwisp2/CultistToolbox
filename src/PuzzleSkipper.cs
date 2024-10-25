@@ -3,7 +3,7 @@ using System.Reflection;
 using FFG.MoM;
 using UnityEngine;
 
-namespace MoMEssentials;
+namespace CultistToolbox;
 
 public class PuzzleSkipper : MonoBehaviour
 {

@@ -5,7 +5,7 @@ using FFG.Common;
 using FFG.MoM;
 using HarmonyLib;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch(typeof(UserCollectionManager))]
 public class UserCollectionManagerPatch

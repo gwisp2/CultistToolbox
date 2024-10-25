@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using MoMEssentials.Patch;
+using CultistToolbox.Patch;
 using UnityEngine;
 
-namespace MoMEssentials.UI;
+namespace CultistToolbox.UI;
 
 public class EssentialsUI : MonoBehaviour
 {

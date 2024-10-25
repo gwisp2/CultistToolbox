@@ -3,7 +3,7 @@ using System.Linq;
 using FFG.MoM;
 using UnityEngine;
 
-namespace MoMEssentials;
+namespace CultistToolbox;
 
 public static class Utilities
 {

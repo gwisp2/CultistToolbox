@@ -1,7 +1,7 @@
 ﻿using FFG.MoM;
 using HarmonyLib;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch]
 public class CurrentScenarioVariantPatch

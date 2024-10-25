@@ -2,7 +2,7 @@
 using BepInEx;
 using UnityEngine;
 
-namespace MoMEssentials.UI;
+namespace CultistToolbox.UI;
 
 public class WindowController(int id, string initialTitle, Action windowFunc, Rect initialRect)
 {

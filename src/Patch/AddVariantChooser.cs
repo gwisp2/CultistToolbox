@@ -5,7 +5,7 @@ using FFG.MoM;
 using HarmonyLib;
 using UnityEngine;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch(typeof(ScenarioSelectionController))]
 public class AddVariantChooser

@@ -7,7 +7,7 @@ using FFG.MoM.Actions;
 using HutongGames.PlayMaker;
 using UnityEngine;
 
-namespace MoMEssentials.FsmExport;
+namespace CultistToolbox.FsmExport;
 
 public class ActionE
 {

@@ -1,8 +1,8 @@
-﻿using FFG.MoM;
+﻿using CultistToolbox.AdvancedCollectionManager;
+using FFG.MoM;
 using HarmonyLib;
-using MoMEssentials.AdvancedCollectionManager;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch(typeof(MythosEventDeckManager))]
 public class MythosEventDeckManagerPatch

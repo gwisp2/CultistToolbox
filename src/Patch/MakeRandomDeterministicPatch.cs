@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using CultistToolbox.DeterministicRandom;
 using FFG.MoM;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 using HutongGames.PlayMaker.Actions;
-using MoMEssentials.DeterministicRandom;
 using Random = UnityEngine.Random;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch]
 public class MakeRandomDeterministicPatch

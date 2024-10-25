@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace MoMEssentials.UI
+namespace CultistToolbox.UI
 {
     public static class Windows
     {

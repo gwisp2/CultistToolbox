@@ -6,7 +6,7 @@ using FFG.MoM.Actions;
 using HarmonyLib;
 using HutongGames.PlayMaker;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch]
 public class TrackActionPatch

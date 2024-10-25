@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MoMEssentials.FsmTools;
+namespace CultistToolbox.FsmTools;
 
 [Flags]
 public enum VariableUsageTypes

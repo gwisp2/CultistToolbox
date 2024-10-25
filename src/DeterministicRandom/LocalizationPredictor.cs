@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FFG.MoM;
 
-namespace MoMEssentials.DeterministicRandom;
+namespace CultistToolbox.DeterministicRandom;
 
 public class LocalizationPredictor
 {

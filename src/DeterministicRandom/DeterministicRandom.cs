@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MoMEssentials.DeterministicRandom;
+namespace CultistToolbox.DeterministicRandom;
 
 public class DeterministicRandom
 {

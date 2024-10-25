@@ -1,7 +1,7 @@
-﻿using HarmonyLib;
-using MoMEssentials.UI;
+﻿using CultistToolbox.UI;
+using HarmonyLib;
 
-namespace MoMEssentials.Patch;
+namespace CultistToolbox.Patch;
 
 [HarmonyPatch(typeof(StartingItem), nameof(StartingItem.Initialize))]
 public class StartingItemsFontPatch

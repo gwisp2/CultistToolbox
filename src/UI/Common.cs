@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace MoMEssentials.UI;
+namespace CultistToolbox.UI;
 
 public static class Common
 {

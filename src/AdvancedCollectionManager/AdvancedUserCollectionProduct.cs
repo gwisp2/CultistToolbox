@@ -1,4 +1,4 @@
-﻿namespace MoMEssentials.AdvancedCollectionManager;
+﻿namespace CultistToolbox.AdvancedCollectionManager;
 
 public class AdvancedUserCollectionProduct(
     string productCode,

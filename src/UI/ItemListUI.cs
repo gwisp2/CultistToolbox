@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CultistToolbox.DeterministicRandom;
 using FFG.MoM;
 using HutongGames.PlayMaker;
-using MoMEssentials.DeterministicRandom;
 using UnityEngine;
 
-namespace MoMEssentials.UI;
+namespace CultistToolbox.UI;
 
 public class ItemListUI : Renderable
 {
@@ -46,7 +46,7 @@ public class ItemListUI : Renderable
         _potentialItems.AddRange(scenario.GeneratedStartingItems ?? []);
 
         // Gather all items
-        MoMEssentials.Utilities.Shuffle(_potentialItems);
+        CultistToolbox.Utilities.Shuffle(_potentialItems);
     }
 
     public override void RenderFirstPass()

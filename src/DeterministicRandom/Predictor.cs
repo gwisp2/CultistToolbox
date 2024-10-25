@@ -4,7 +4,7 @@ using FFG.MoM;
 using FFG.MoM.Actions;
 using HutongGames.PlayMaker;
 
-namespace MoMEssentials.DeterministicRandom;
+namespace CultistToolbox.DeterministicRandom;
 
 public static class Predictor
 {

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
-using MoMEssentials.Patch;
+using CultistToolbox.Patch;
 
-namespace MoMEssentials.AdvancedCollectionManager;
+namespace CultistToolbox.AdvancedCollectionManager;
 
 public static class AdvancedCollectionFacade
 {
@@ -34,7 +34,7 @@ public static class AdvancedCollectionFacade
             Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.Monsters);
         var isFilteringMythosEvents =
             Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.MythosEvents);
-        
+
         foreach (var collectionItem in collectionCopy.Items)
         {
             if (!collectionItem.ProductModel.CanToggle ||

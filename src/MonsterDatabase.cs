@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CultistToolbox.Patch;
 using HarmonyLib;
-using MoMEssentials.Patch;
 using MonoMod.Utils;
 
-namespace MoMEssentials;
+namespace CultistToolbox;
 
 public class MonsterDatabase
 {

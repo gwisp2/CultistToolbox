@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using BepInEx.Configuration;
-using MoMEssentials.Patch;
-using MoMEssentials.UI;
+using CultistToolbox.Patch;
+using CultistToolbox.UI;
 using UnityEngine;
 
-namespace MoMEssentials.AdvancedCollectionManager;
+namespace CultistToolbox.AdvancedCollectionManager;
 
 public class AdvancedCollectionManagerUi
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using FFG.MoM;
 using UnityEngine;
 
-namespace MoMEssentials.UI;
+namespace CultistToolbox.UI;
 
 public class TileListUI : Renderable
 {
