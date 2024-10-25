@@ -32,17 +32,20 @@ public static class AdvancedCollectionFacade
         var isFilteringItems = Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.Items);
         var isFilteringMonsters =
             Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.Monsters);
-        if (isFilteringItems || isFilteringMonsters)
+        var isFilteringMythosEvents =
+            Plugin.ConfigScenarioRestrictedComponentTypes.Value.HasFlag(ItemComponentTypes.MythosEvents);
+        
+        foreach (var collectionItem in collectionCopy.Items)
         {
-            foreach (var collectionItem in collectionCopy.Items)
-            {
-                if (!collectionItem.ProductModel.CanToggle ||
-                    scenarioVariant.RequiredAdditionalProducts.Contains(collectionItem.ProductModel)) continue;
-                if (isFilteringItems)
-                    collectionItem.HasItems = false;
-                if (isFilteringMonsters)
-                    collectionItem.HasMonsters = false;
-            }
+            if (!collectionItem.ProductModel.CanToggle ||
+                scenarioVariant.RequiredAdditionalProducts.Contains(collectionItem.ProductModel)) continue;
+            if (isFilteringItems)
+                collectionItem.HasItems = false;
+            if (isFilteringMonsters)
+                collectionItem.HasMonsters = false;
+            if (isFilteringMythosEvents)
+                collectionItem.HasMythosEvents = false;
+            collectionItem.HasTiles = false;
         }
 
         _lastCollection = collection;
