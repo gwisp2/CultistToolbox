@@ -33,7 +33,7 @@ public class UserCollectionManagerPatch
         {
             if (product == null) continue;
             collection.AddEmptyProduct(product); // add it to collection for further edit
-            bool available = FFGPlayerPrefs.GetInt(product.ProductCode) > 0;
+            bool available = FFGPlayerPrefs.GetInt(product.ProductCode) > 0 || !product.CanToggle;
             if (available)
             {
                 collection.AddCompleteProduct(product);
