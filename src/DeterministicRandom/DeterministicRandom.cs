@@ -84,15 +84,18 @@ public class DeterministicRandom
 
     public static uint GetSplitIndex<T>(T element)
     {
+        var collection = Plugin.ConfigCollection.Value;
         string elementType = typeof(T).Name;
         int elementId = -1;
         if (element is ItemModel model)
         {
             elementId = model.Id;
             if (model.Type == ItemType.Unique) return 0;
+            if (ItemDatabase.Instance.GetProducts(model).Any(p => !collection.Get(p).IsShared)) return 0;
         } else if (element is MonsterModel monsterModel)
         {
             elementId = monsterModel.Id;
+            if (MonsterDatabase.Instance.GetProducts(monsterModel).Any(p => !collection.Get(p).IsShared)) return 0;
         }
         
         if (elementId != -1)
