@@ -19,6 +19,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<KeyboardShortcut> ConfigSkipPuzzleShortcut { get; set; }
     internal static ConfigEntry<AdvancedUserCollection> ConfigCollection { get; set; }
     internal static ConfigEntry<ItemComponentTypes> ConfigScenarioRestrictedComponentTypes { get; set; }
+    internal static ConfigEntry<uint> ConfigCollectionSharedPart { get; set; }
 
     private void Awake()
     {
@@ -31,6 +32,9 @@ public class Plugin : BaseUnityPlugin
         ConfigUiKey = Config.Bind("General", "UIKey", new KeyboardShortcut(KeyCode.F6));
         ConfigShowExpansionIcon = Config.Bind("General", "ShowExpansionIcon", true);
         ConfigSkipPuzzleShortcut = Config.Bind("General", "SkipPuzzleKey", KeyboardShortcut.Empty);
+        ConfigUiKey = Config.Bind("General", "UIKey", new KeyboardShortcut(KeyCode.F6));
+        ConfigCollectionSharedPart = Config.Bind("General", "CollectionSharedPart", 0u,
+            new ConfigDescription("Description", new AcceptableValueRange<uint>(0, 2)));
         ConfigCollection = Config.Bind("General", "Collection", new AdvancedUserCollection(),
             new ConfigDescription("available expansions", null,
                 new ConfigurationManagerAttributes

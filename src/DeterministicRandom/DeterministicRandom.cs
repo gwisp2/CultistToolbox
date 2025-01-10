@@ -19,7 +19,7 @@ public class DeterministicRandom
 
     public void Reset(string newSalt)
     {
-        this._salt = newSalt ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+        this._salt = "1"; // newSalt ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
         this._callIndex = 0;
     }
 
@@ -76,11 +76,43 @@ public class DeterministicRandom
     {
         IncrementCallIndex();
         var list = collection
-            .Select(element => new { Element = element, Priority = DeterministicallyAssignULong(element) }).ToList();
-        list.Sort((a, b) => a.Priority.CompareTo(b.Priority));
+            .Select(element => new { Element = element, IsInSharePart = IsInCurrentSharedPart(element), Priority = DeterministicallyAssignULong(element) })
+            .OrderBy(e => (e.IsInSharePart ? 0 : 1, e.Priority));
+        
         return list.Select(pair => pair.Element).ToList();
     }
 
+    public static uint GetSplitIndex<T>(T element)
+    {
+        string elementType = typeof(T).Name;
+        int elementId = -1;
+        if (element is ItemModel model)
+        {
+            elementId = model.Id;
+            if (model.Type == ItemType.Unique) return 0;
+        } else if (element is MonsterModel monsterModel)
+        {
+            elementId = monsterModel.Id;
+        }
+        
+        if (elementId != -1)
+        {
+            return (uint) (BitConverter.ToUInt64(ComputeNonRandomHash(elementType + elementId), 0) % 2u + 1u);
+        }
+
+        return 0;
+    }
+    
+    private static bool IsInCurrentSharedPart<T>(T element)
+    {
+        if (Plugin.ConfigCollectionSharedPart.Value == 0)
+        {
+            return true;
+        }
+        var splitIndex = GetSplitIndex(element);
+        return splitIndex == 0 || splitIndex == Plugin.ConfigCollectionSharedPart.Value;
+    }
+    
     private ulong DeterministicallyAssignULong<T>(T element)
     {
         return BitConverter.ToUInt64(ComputeHash(RuntimeHelpers.GetHashCode(element).ToString()), 0);
@@ -104,7 +136,11 @@ public class DeterministicRandom
 
     private byte[] ComputeHash(string extraInput = "")
     {
-        var input = _salt + _callIndex + extraInput;
+        return ComputeNonRandomHash(_salt + _callIndex + extraInput);
+    }
+    
+    private static byte[] ComputeNonRandomHash(string input)
+    {
         using var sha256 = SHA256.Create();
         byte[] inputBytes = Encoding.UTF8.GetBytes(input);
         return sha256.ComputeHash(inputBytes);

@@ -16,6 +16,12 @@ public class AdvancedUserCollectionProduct(
 
     public ProductModel ProductModel => MoMDBManager.DB.GetProductByCode(ProductCode);
 
+    public bool IsShared
+    {
+        get => AllPresent(ItemComponentTypes.IsShared);
+        set => Set(ItemComponentTypes.IsShared, value);
+    }
+    
     public bool HasInvestigators
     {
         get => AllPresent(ItemComponentTypes.Investigators);
@@ -74,27 +80,24 @@ public class AdvancedUserCollectionProduct(
         Set(ItemComponentTypes.All, value);
     }
 
-    public bool IsAnythingSelected => _presentComponents != 0;
-    public bool IsEverythingSelected => _presentComponents == ItemComponentTypes.All;
+    public bool IsAnythingSelected => ((int)_presentComponents & (int)ItemComponentTypes.All) != 0;
+    public bool IsEverythingSelected => _presentComponents.HasFlag(ItemComponentTypes.All);
 
     public string SaveToString()
     {
         return _presentComponents.ToShortString();
     }
 
-    public ItemComponentTypes LoadFromString(string value)
+    public void LoadFromString(string value)
     {
         if (IsFrozen)
         {
             Plugin.Logger.LogWarning(
                 $"AdvancedUserCollectionProduct: LoadFromString() called on the frozen collection product");
-            return ItemComponentTypes.None;
+            return;
         }
 
-        ItemComponentTypes target = ItemComponentTypesExtensions.FromShortString(value);
-        var changeMask = _presentComponents & target;
-        _presentComponents = target;
-        return changeMask;
+        _presentComponents = ItemComponentTypesExtensions.FromShortString(value);
     }
 
     public void Freeze()

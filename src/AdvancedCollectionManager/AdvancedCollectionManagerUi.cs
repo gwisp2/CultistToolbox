@@ -115,6 +115,9 @@ public class AdvancedCollectionManagerUi
             _toggleStyles.Value[styleIndex]);
         bool hasTiles = GUILayout.Toggle(product.HasTiles, $"Tiles ({nTiles})", _toggleStyles.Value[styleIndex]);
         GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        bool isShared = GUILayout.Toggle(product.IsShared, $"Shared with other table");
+        GUILayout.EndHorizontal();
         if (editable)
         {
             product.HasInvestigators = hasInvestigators;
@@ -122,6 +125,7 @@ public class AdvancedCollectionManagerUi
             product.HasMonsters = hasMonsters;
             product.HasMythosEvents = hasMythos;
             product.HasTiles = hasTiles;
+            product.IsShared = isShared;
         }
     }
 

@@ -94,15 +94,17 @@ public class ItemListUI : Renderable
 
     private static string FormatItem(ItemModel model)
     {
-        var prefixes = model.Type switch
+        var splitIndex = DeterministicRandom.DeterministicRandom.GetSplitIndex(model);
+        var splitIndexPrefix = splitIndex != 0 ? $"[{splitIndex}]" : "";
+        var itemTypePrefix = model.Type switch
         {
             ItemType.Unique => "[U]",
             ItemType.Spell => "[S]",
             ItemType.Common => "[C]",
             _ => "[-] "
         };
-        var name = Localization.Get(model.Name.Key) ?? model.Name.Key;
-        var text = prefixes + " " + name;
+        var name = Localization.Get(model.Name.Key) ?? model.Name.Key; 
+        var text = splitIndexPrefix + itemTypePrefix + " " + name;
         return text;
     }
 

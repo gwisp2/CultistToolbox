@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
 
@@ -61,7 +62,7 @@ public class AdvancedUserCollection
 
     public AdvancedUserCollectionProduct Get(string productCode)
     {
-        return _items.FirstOrDefault(item => item.ProductModel.ProductCode == productCode);
+        return _items.FirstOrDefault(item => item.ProductCode == productCode);
     }
 
     private AdvancedUserCollectionProduct GetOrCreate(string productCode)

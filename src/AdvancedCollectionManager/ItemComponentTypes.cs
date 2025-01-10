@@ -14,6 +14,7 @@ public enum ItemComponentTypes
     Monsters = 4,
     MythosEvents = 8,
     Tiles = 16,
+    IsShared = 32,
     All = 31
 }
 
@@ -31,7 +32,8 @@ public static class ItemComponentTypesExtensions
         { ItemComponentTypes.Investigators, 'I' },
         { ItemComponentTypes.Monsters, 'm' },
         { ItemComponentTypes.MythosEvents, 'M' },
-        { ItemComponentTypes.Tiles, 't' }
+        { ItemComponentTypes.Tiles, 't' },
+        { ItemComponentTypes.IsShared, '/' },
     };
 
     private static readonly Dictionary<char, ItemComponentTypes> CharToEnumMap =

@@ -52,6 +52,6 @@ public static class AdvancedCollectionFacade
         _lastScenarioVariant = scenarioVariant;
         _effectiveCollection = collectionCopy.Freeze();
 
-        return collection;
+        return _effectiveCollection;
     }
 }
