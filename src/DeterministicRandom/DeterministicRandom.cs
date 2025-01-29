@@ -19,7 +19,7 @@ public class DeterministicRandom
 
     public void Reset(string newSalt)
     {
-        this._salt = "1"; // newSalt ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+        this._salt = newSalt ?? DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
         this._callIndex = 0;
     }
 
