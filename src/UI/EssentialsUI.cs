@@ -1,6 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using CultistToolbox.FsmExport;
 using CultistToolbox.Patch;
+using FFG.MoM;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace CultistToolbox.UI;
 
@@ -48,6 +53,40 @@ public class EssentialsUI : MonoBehaviour
         DrawToggleButton("Items", _itemListUI);
         DrawToggleButton("Investigators", _investigatorMagicUI);
         DrawToggleButton("FSM tools", _fsmToolsUI);
+        if (GUILayout.Button("Export FSM"))
+        {
+            // Get all FSMs
+            var sce = new ScenarioE();
+            foreach (var playMakerFsm in Utilities.FindComponents<PlayMakerFSM>())
+            {
+                var fsm = playMakerFsm.Fsm;
+                if (fsm == null) continue;
+                if (!fsm.States.Select(s => s.Actions).Any()) continue;
+                sce.Fsms[playMakerFsm.gameObject.GetFullName()] = FsmE.FromFsm(fsm);
+            }
+            foreach (var mMapTile in Utilities.FindComponents<MoM_MapTile>())
+            {
+                var renderer = mMapTile.GetComponent<MeshRenderer>();
+                if (renderer == null) continue;
+                sce.Tiles.Add(new TileE()
+                {
+                    FullName = mMapTile.gameObject.GetFullName(),
+                    Extents = XY.FromVec3(renderer.bounds.extents),
+                    Position = XY.FromVec3(renderer.bounds.center),
+                    RotationAngle = mMapTile.transform.localRotation.eulerAngles.z,
+                    TextureName = renderer.sharedMaterial?.mainTexture?.name
+                });
+            }
+
+            var targetDir = Application.persistentDataPath + "/fsm-export";
+            if (!Directory.Exists(targetDir))
+            {
+                Directory.CreateDirectory(targetDir);
+            }
+
+            var scenarioVariantName = GameData.ScenarioVariant.name;
+            File.WriteAllText(targetDir + $"/{scenarioVariantName}.json", Newtonsoft.Json.JsonConvert.SerializeObject(sce));
+        }
     }
 
     private void DrawToggleButton(string text, Renderable renderable)
