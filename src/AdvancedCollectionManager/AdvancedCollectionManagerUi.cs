@@ -125,8 +125,9 @@ public class AdvancedCollectionManagerUi
             product.HasMonsters = hasMonsters;
             product.HasMythosEvents = hasMythos;
             product.HasTiles = hasTiles;
-            product.IsShared = isShared;
         }
+
+        product.IsShared = isShared;
     }
 
     private static int GetStyleIndex(AdvancedUserCollectionProduct product)
