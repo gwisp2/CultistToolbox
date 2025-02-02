@@ -4,9 +4,9 @@ using System.Linq;
 using FFG.MoM;
 using UnityEngine;
 
-namespace CultistToolbox.UI;
+namespace CultistToolbox.UI.Tabs;
 
-public class TileListUI : Renderable
+public class TileListTab() : ToolboxTab("Tiles")
 {
     private class TileInfo
     {
@@ -57,17 +57,9 @@ public class TileListUI : Renderable
     }
 
     private List<TileInfo> _tiles = new();
-    private readonly WindowController _window;
-    private readonly TooltipWindow _tooltipWindow;
     private Vector2 _scrollPosition;
 
-    public TileListUI()
-    {
-        _window = new(Windows.TilesWindowId, "Tiles", DrawWindowContent, Windows.TilesWindowRect);
-        _tooltipWindow = new TooltipWindow(Windows.TileTooltipWindowId);
-    }
-
-    public void Update()
+    public override void OnScenarioLoaded()
     {
         _tiles = Utilities.FindComponents<MoM_MapTile>()
             .Select(mapTile => new TileInfo(mapTile))
@@ -76,30 +68,16 @@ public class TileListUI : Renderable
             .ToList();
     }
 
-    public override void RenderFirstPass()
-    {
-        _window.RenderWindow();
-    }
-
-    public override void RenderSecondPass()
-    {
-        _tooltipWindow.OnGUI();
-    }
-
-    private void DrawWindowContent()
+    public override void Render()
     {
         if (!GameData.IsInitialized) return;
         _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
-        _tooltipWindow.Hide();
         foreach (var tile in _tiles)
         {
+            GUILayout.BeginHorizontal();
+            Common.DrawTexture(tile.Texture, tile.MinSideSize * 100);
             GUILayout.Label(tile.SizeWithName, Common.HighlightOnHoverLabelStyle.Value);
-            var lastRect = GUILayoutUtility.GetLastRect();
-            if (lastRect.Contains(_window.GetRelativeMousePosition() + _scrollPosition) && tile.Texture)
-            {
-                _tooltipWindow.SetTooltip(tile.Name, tile.Texture, tile.MinSideSize * 500,
-                    Utilities.GetMousePosition());
-            }
+            GUILayout.EndHorizontal();
         }
 
         GUILayout.EndScrollView();

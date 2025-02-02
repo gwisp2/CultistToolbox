@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CultistToolbox.FsmExport;
 using FFG.MoM;
 using FFG.MoM.Actions;
-using HarmonyLib;
 using HutongGames.PlayMaker;
 
 namespace CultistToolbox.DeterministicRandom;
@@ -58,7 +56,7 @@ public static class Predictor
         return predictor;
     }
 
-    private static MoM_LocalizationPacket ExtractMessage(IFsmStateAction action)
+    public static MoM_LocalizationPacket ExtractMessage(IFsmStateAction action)
     {
         switch (action)
         {
@@ -91,18 +89,7 @@ public static class Predictor
             spawnItem.ExcludeTraits, spawnItem.Filter).ToList();
         if (!candidates.Any()) return null;
         var sortedElements = DeterministicRandomFacade.SortElementsByRandomPriority(candidates);
-        
-        var firstCandidate = sortedElements[0];
-        if (DeterministicRandom.GetSplitIndex(firstCandidate) != 0 && DeterministicRandom.GetSplitIndex(firstCandidate) != Plugin.ConfigCollectionSharedPart.Value)
-        {
-            Plugin.Logger.LogWarning("No items in needed part");
-            Plugin.Logger.LogWarning("n candidates in all parts: " + sortedElements.Count);
-            Plugin.Logger.LogWarning("Parts: " + sortedElements.Select(DeterministicRandom.GetSplitIndex).Join(s => $"{s}"));
-            var reqTraits = ActionE.GetFlagNames(spawnItem.RequiredTraits).Join(delimiter:",");
-            var exclTraits = ActionE.GetFlagNames(spawnItem.ExcludeTraits).Join(delimiter:",");
-            Plugin.Logger.LogWarning("Required: " + reqTraits+ " excluded: " + exclTraits);
-        }
-        
+
         return new ItemSpawnPriorities(sortedElements);
     }
-} 
+}

@@ -11,6 +11,10 @@ using Random = UnityEngine.Random;
 
 namespace CultistToolbox.Patch;
 
+/**
+ * Makes random predictable.
+ * Useful for plugins such as voice4mom that may aggressively preload possible future messages.
+ */
 [HarmonyPatch]
 public class MakeRandomDeterministicPatch
 {

@@ -19,7 +19,8 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<KeyboardShortcut> ConfigSkipPuzzleShortcut { get; set; }
     internal static ConfigEntry<AdvancedUserCollection> ConfigCollection { get; set; }
     internal static ConfigEntry<ItemComponentTypes> ConfigScenarioRestrictedComponentTypes { get; set; }
-    internal static ConfigEntry<uint> ConfigCollectionSharedPart { get; set; }
+
+    internal static GameObject PluginObject;
 
     private void Awake()
     {
@@ -33,8 +34,6 @@ public class Plugin : BaseUnityPlugin
         ConfigShowExpansionIcon = Config.Bind("General", "ShowExpansionIcon", true);
         ConfigSkipPuzzleShortcut = Config.Bind("General", "SkipPuzzleKey", KeyboardShortcut.Empty);
         ConfigUiKey = Config.Bind("General", "UIKey", new KeyboardShortcut(KeyCode.F6));
-        ConfigCollectionSharedPart = Config.Bind("General", "CollectionSharedPart", 0u,
-            new ConfigDescription("Description", new AcceptableValueRange<uint>(0, 2)));
         ConfigCollection = Config.Bind("General", "Collection", new AdvancedUserCollection(),
             new ConfigDescription("available expansions", null,
                 new ConfigurationManagerAttributes
@@ -56,15 +55,15 @@ public class Plugin : BaseUnityPlugin
         var harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
         harmony.PatchAll();
         // Make random deterministic
-        TrackActionPatch.OnActionMethodStart += (action) => DeterministicRandomFacade.OpenContext(action);
-        TrackActionPatch.OnActionMethodEnd += DeterministicRandomFacade.CloseContext;
+        TrackFsmActionsPatch.OnActionMethodStart += (action) => DeterministicRandomFacade.OpenContext(action);
+        TrackFsmActionsPatch.OnActionMethodEnd += DeterministicRandomFacade.CloseContext;
         // Setup collection manager
         UserCollectionManagerPatch.Setup();
         // Create UI
-        var pluginObject = new GameObject(MyPluginInfo.PLUGIN_GUID);
-        DontDestroyOnLoad(pluginObject);
-        pluginObject.AddComponent<EssentialsUI>();
-        pluginObject.AddComponent<IconFontLocator>();
-        pluginObject.AddComponent<PuzzleSkipper>();
+        PluginObject = new GameObject(MyPluginInfo.PLUGIN_GUID);
+        DontDestroyOnLoad(PluginObject);
+        PluginObject.AddComponent<ToolboxWindow>();
+        PluginObject.AddComponent<IconFontLocator>();
+        PluginObject.AddComponent<PuzzleSkipper>();
     }
 }

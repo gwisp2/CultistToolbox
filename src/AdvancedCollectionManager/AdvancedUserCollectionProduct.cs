@@ -21,7 +21,7 @@ public class AdvancedUserCollectionProduct(
         get => AllPresent(ItemComponentTypes.IsShared);
         set => Set(ItemComponentTypes.IsShared, value);
     }
-    
+
     public bool HasInvestigators
     {
         get => AllPresent(ItemComponentTypes.Investigators);

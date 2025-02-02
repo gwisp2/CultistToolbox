@@ -7,6 +7,10 @@ using HarmonyLib;
 
 namespace CultistToolbox.Patch;
 
+/*
+ * Patch that syncs plugin-managed product collection with the game-managed collection.
+ * Also fixes UI to use plugin-managed collection.
+ */
 [HarmonyPatch(typeof(UserCollectionManager))]
 public class UserCollectionManagerPatch
 {
@@ -129,19 +133,19 @@ public class UserCollectionManagerPatch
         }
 
         // Fix in UI
-        foreach (var collectionProduct in UI.Utilities.FindComponents<CollectionProduct>(false))
+        foreach (var collectionProduct in Utilities.FindComponents<CollectionProduct>(false))
         {
             collectionProduct.UpdateVisuals();
         }
 
-        foreach (var collectionProductMenu in UI.Utilities.FindComponents<CollectionProductMenu>(false))
+        foreach (var collectionProductMenu in Utilities.FindComponents<CollectionProductMenu>(false))
         {
             var product = _curModelRef(collectionProductMenu);
             if (product == null) continue;
             collectionProductMenu.UpdateVisuals(product.Owned);
         }
 
-        foreach (var scenarioSelectionController in UI.Utilities.FindComponents<ScenarioSelectionController>(false))
+        foreach (var scenarioSelectionController in Utilities.FindComponents<ScenarioSelectionController>(false))
         {
             // Update scenario availability
             var scenario = _curScenarioRef(scenarioSelectionController);
@@ -149,7 +153,7 @@ public class UserCollectionManagerPatch
             scenarioSelectionController.LoadScenario(scenario);
         }
 
-        foreach (var setupViewController in UI.Utilities.FindComponents<SetupViewController>(false))
+        foreach (var setupViewController in Utilities.FindComponents<SetupViewController>(false))
         {
             var investigatorSelectionManager = setupViewController.PanelInvestigatorSelect;
             if (investigatorSelectionManager == null) continue;

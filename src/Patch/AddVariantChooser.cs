@@ -7,10 +7,13 @@ using UnityEngine;
 
 namespace CultistToolbox.Patch;
 
+/**
+ * Adds ability to select a variant for a scenario instead of choosing a random one
+ */
 [HarmonyPatch(typeof(ScenarioSelectionController))]
 public class AddVariantChooser
 {
-    private static Lazy<ScenarioVariant> RandomScenarioVariant = new(() =>
+    private static readonly Lazy<ScenarioVariant> RandomScenarioVariant = new(() =>
     {
         ScenarioVariant scenarioVariant = ScriptableObject.CreateInstance<ScenarioVariant>();
         scenarioVariant.name = "Random Variant";
@@ -47,7 +50,7 @@ public class AddVariantChooser
         foreach (ScenarioVariant variant in ctrl.SelectedScenario.Variants)
         {
             if (variant != null &&
-                UserCollectionManager.IsAllOwned((IEnumerable<ProductModel>)variant.RequiredAdditionalProducts, true))
+                UserCollectionManager.IsAllOwned(variant.RequiredAdditionalProducts, true))
             {
                 string baseIcon = "\uf209";
                 string icons = variant.RequiredAdditionalProducts.Select(Utilities.GetProductIcons).Join(delimiter: "");

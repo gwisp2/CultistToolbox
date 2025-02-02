@@ -8,9 +8,9 @@ using HarmonyLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace CultistToolbox.UI;
+namespace CultistToolbox.UI.Tabs;
 
-public class InvestigatorMagicUI : Renderable
+public class InvestigatorMagicTab() : ToolboxTab("Investigators")
 {
     private static bool _scenarioHasGetInvestigatorId;
     private static ScenarioVariant _scenarioVariant;
@@ -18,7 +18,6 @@ public class InvestigatorMagicUI : Renderable
     private static readonly FieldInfo SModelField =
         typeof(GameData).GetField("s_model", BindingFlags.NonPublic | BindingFlags.Static);
 
-    private readonly WindowController _window;
     private const int MinInvestigators = 2;
     private const int MaxInvestigators = 5;
     private InvestigatorModel _selectedInvestigator;
@@ -27,39 +26,28 @@ public class InvestigatorMagicUI : Renderable
     private const int ButtonsPerRow = 3;
     private bool _isAddingInvestigator;
 
-    public InvestigatorMagicUI()
-    {
-        _window = new WindowController(Windows.InvestigatorsWindowId, "Investigators", this.DrawWindowContent,
-            Windows.InvestigatorsWindowRect);
-    }
-
-    public void Update()
+    public override void OnScenarioLoaded()
     {
         _scenarioHasGetInvestigatorId = Utilities.EnumerateAllActions<GetInvestigatorId>().Any();
         _scenarioVariant = CurrentScenarioVariantPatch.CurrentScenarioVariant;
     }
 
-    public override void RenderFirstPass()
-    {
-        _window.RenderWindow();
-    }
-
     private float CalculateButtonWidth()
     {
-        float windowWidth = _window.CurrentRect.width;
+        float windowWidth = 800;
         float padding = 30f; // Adjust this value based on your UI's padding
         float labelWidth = 150f; // Estimated width for the investigator name label
         float availableWidth = windowWidth - padding - labelWidth;
         return availableWidth / 2; // Divide by 2 for 'Remove' and 'Replace' buttons
     }
 
-    private void DrawWindowContent()
+    public override void Render()
     {
         if (!GameData.IsInitialized) return;
 
         if (_scenarioHasGetInvestigatorId && GameData.ScenarioVariant == _scenarioVariant)
         {
-            GUILayout.Label("Warning: this scenario remembers investigators names and will break if you change them!",
+            GUILayout.Label("Warning: this scenario remembers investigator names and will break if you change them!",
                 Common.WarningLabelStyle.Value);
         }
 
@@ -159,7 +147,7 @@ public class InvestigatorMagicUI : Renderable
             for (int j = 0; j < ButtonsPerRow && i + j < availableInvestigators.Count; j++)
             {
                 var newInvestigator = availableInvestigators[i + j];
-                if (GUILayout.Button(Localization.Get(newInvestigator.Name.Key), GUILayout.Width(buttonWidth)))
+                if (GUILayout.Button(Localization.Get(newInvestigator.Name.Key)))
                 {
                     if (_isAddingInvestigator)
                     {

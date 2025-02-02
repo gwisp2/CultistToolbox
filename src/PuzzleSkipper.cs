@@ -15,12 +15,17 @@ public class PuzzleSkipper : MonoBehaviour
     {
         if (Plugin.ConfigSkipPuzzleShortcut.Value.IsDown())
         {
-            var controller = UI.Utilities.FindComponents<PuzzleViewController>().FirstOrDefault();
-            var currentPuzzle = controller?.CurrentPuzzle;
-            if (currentPuzzle)
-            {
-                OnPuzzleCompleted.Invoke(currentPuzzle, [true]);
-            }
+            SkipCurrentPuzzle();
+        }
+    }
+
+    public static void SkipCurrentPuzzle()
+    {
+        var controller = Utilities.FindComponents<PuzzleViewController>().FirstOrDefault();
+        var currentPuzzle = controller?.CurrentPuzzle;
+        if (currentPuzzle)
+        {
+            OnPuzzleCompleted.Invoke(currentPuzzle, [true]);
         }
     }
 }

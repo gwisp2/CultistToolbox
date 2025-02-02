@@ -3,6 +3,10 @@ using HarmonyLib;
 
 namespace CultistToolbox.Patch;
 
+/**
+ * To support Plugin.ConfigScenarioRestrictedComponentTypes configuration
+ * we need to choose a random scenario variant before generating initial items
+ */
 [HarmonyPatch]
 public class CurrentScenarioVariantPatch
 {
@@ -26,7 +30,7 @@ public class CurrentScenarioVariantPatch
         if (scenarioVariant == null || scenarioVariant.name == "Random Variant")
         {
             // Select a bit earlier
-            // We need to limit available starting items (see usages of Plugin.ConfigLimitAvailableItems)
+            // We need to limit available starting items (see usages of Plugin.ConfigScenarioRestrictedComponentTypes)
             var selectedScenario = __instance.PanelScenarioSelect.SelectedScenario;
             __instance.SelectedVariant = CurrentScenarioVariant = __instance
                 .FindPossibleVariants(selectedScenario)

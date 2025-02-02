@@ -8,15 +8,19 @@ using HutongGames.PlayMaker;
 
 namespace CultistToolbox.Patch;
 
+/**
+ * Patch that allows to do something when OnEnter and OnExit methods of IFsmStateAction are called.
+ * Used to track context for deterministic random.
+ */
 [HarmonyPatch]
-public class TrackActionPatch
+public class TrackFsmActionsPatch
 {
     public static event Action<IFsmStateAction> OnActionMethodStart;
     public static event Action<IFsmStateAction> OnActionMethodEnd;
 
     public static void Patch(Harmony harmony)
     {
-        harmony.PatchAll(typeof(TrackActionPatch));
+        harmony.PatchAll(typeof(TrackFsmActionsPatch));
     }
 
     public static void Prefix(IFsmStateAction __instance)

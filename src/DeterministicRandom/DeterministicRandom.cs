@@ -76,9 +76,9 @@ public class DeterministicRandom
     {
         IncrementCallIndex();
         var list = collection
-            .Select(element => new { Element = element, IsInSharePart = IsInCurrentSharedPart(element), Priority = DeterministicallyAssignULong(element) })
-            .OrderBy(e => (e.IsInSharePart ? 0 : 1, e.Priority));
-        
+            .Select(element => new { Element = element, Priority = DeterministicallyAssignULong(element) })
+            .OrderBy(e => e.Priority);
+
         return list.Select(pair => pair.Element).ToList();
     }
 
@@ -92,30 +92,21 @@ public class DeterministicRandom
             elementId = model.Id;
             if (model.Type == ItemType.Unique) return 0;
             if (ItemDatabase.Instance.GetProducts(model).Any(p => !collection.Get(p).IsShared)) return 0;
-        } else if (element is MonsterModel monsterModel)
+        }
+        else if (element is MonsterModel monsterModel)
         {
             elementId = monsterModel.Id;
             if (MonsterDatabase.Instance.GetProducts(monsterModel).Any(p => !collection.Get(p).IsShared)) return 0;
         }
-        
+
         if (elementId != -1)
         {
-            return (uint) (BitConverter.ToUInt64(ComputeNonRandomHash(elementType + elementId), 0) % 2u + 1u);
+            return (uint)(BitConverter.ToUInt64(ComputeNonRandomHash(elementType + elementId), 0) % 2u + 1u);
         }
 
         return 0;
     }
-    
-    private static bool IsInCurrentSharedPart<T>(T element)
-    {
-        if (Plugin.ConfigCollectionSharedPart.Value == 0)
-        {
-            return true;
-        }
-        var splitIndex = GetSplitIndex(element);
-        return splitIndex == 0 || splitIndex == Plugin.ConfigCollectionSharedPart.Value;
-    }
-    
+
     private ulong DeterministicallyAssignULong<T>(T element)
     {
         return BitConverter.ToUInt64(ComputeHash(RuntimeHelpers.GetHashCode(element).ToString()), 0);
@@ -141,7 +132,7 @@ public class DeterministicRandom
     {
         return ComputeNonRandomHash(_salt + _callIndex + extraInput);
     }
-    
+
     private static byte[] ComputeNonRandomHash(string input)
     {
         using var sha256 = SHA256.Create();

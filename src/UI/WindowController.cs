@@ -11,14 +11,9 @@ public class WindowController(int id, string initialTitle, Action windowFunc, Re
     public bool BlocksInput { set; get; } = true;
     private GUIStyle _windowStyle;
 
-    public Vector2 GetRelativeMousePosition()
-    {
-        return Utilities.GetMousePosition() - CurrentRect.position - new Vector2(0, GUI.skin.window.border.top);
-    }
-
     public bool IsMouseInWindow()
     {
-        return CurrentRect.Contains(Utilities.GetMousePosition());
+        return CurrentRect.Contains(GetMousePosition());
     }
 
     public void RenderWindow()
@@ -46,5 +41,12 @@ public class WindowController(int id, string initialTitle, Action windowFunc, Re
         {
             Input.ResetInputAxes();
         }
+    }
+
+    public static Vector2 GetMousePosition()
+    {
+        Vector2 mousePosition = UnityInput.Current.mousePosition;
+        mousePosition.y = Screen.height - mousePosition.y;
+        return mousePosition;
     }
 }

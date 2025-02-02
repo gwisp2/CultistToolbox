@@ -28,8 +28,9 @@ public class MonsterDatabase
         _monstersByNameKey = allMonsters.ToDictionary(monster => monster.Name.Key);
         _monstersByName = new();
         _monstersByName.AddRange(allMonsters.ToDictionary(monster =>
-            LocalizationPatch.OriginalGet(monster.Name.Key).ToLower()));
-        _monstersByName.AddRange(allMonsters.ToDictionary(monster => LocalizationPatch.OriginalGet(monster.Name.Key)));
+            ShowProductItemPatch.OriginalGet(monster.Name.Key).ToLower()));
+        _monstersByName.AddRange(
+            allMonsters.ToDictionary(monster => ShowProductItemPatch.OriginalGet(monster.Name.Key)));
         _productsContainingMonster = MoMDBManager.DB.GetProducts()
             .SelectMany(product => product.Monsters.Select(monster => new { monster.monster, product }))
             .ToLookup(monster => monster.monster.Id, item => item.product);
