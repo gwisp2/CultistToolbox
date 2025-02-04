@@ -47,9 +47,10 @@ public static class Predictor
                 predictor.PredictInCurrentActionContext(recentItem: item);
                 break;
             case SpawnMonster spawnMonster:
-                var monster = PredictSpawnedMonsterInCurrentContext(spawnMonster);
-                if (monster == null) return null;
-                predictor.PredictInCurrentActionContext(recentMonster: monster);
+                var monsterModel = PredictSpawnedMonsterInCurrentContext(spawnMonster);
+                if (monsterModel == null) return null;
+                predictor.PredictInCurrentActionContext(recentMonsterName: Coalesce(spawnMonster.MonsterName,
+                    monsterModel.Name));
                 break;
         }
 
@@ -72,6 +73,10 @@ public static class Predictor
 
         return null;
     }
+
+    private static LocalizationPacket Coalesce(params LocalizationPacket[] packets) =>
+        packets
+            .FirstOrDefault(p => p != null && Localization.Has(p.Key));
 
     private static MonsterModel PredictSpawnedMonsterInCurrentContext(SpawnMonster spawnMonster)
     {

@@ -14,7 +14,7 @@ public class LocalizationPredictor
     private List<ItemModel> _itemPool;
     private List<RoomModel> _roomPool;
     private ItemModel _recentItem = null;
-    private MonsterModel _recentMonster = null;
+    private LocalizationPacket _recentMonsterName = null;
 
     private string _localizedText = null;
     private List<ItemSpawnPriorities> _itemSpawnPriorities = new();
@@ -35,10 +35,11 @@ public class LocalizationPredictor
         _inserts = packet.Inserts.Where((_, index) => index < nArgs).ToList();
     }
 
-    public string PredictInCurrentActionContext(ItemModel recentItem = null, MonsterModel recentMonster = null)
+    public string PredictInCurrentActionContext(ItemModel recentItem = null,
+        LocalizationPacket recentMonsterName = null)
     {
         this._recentItem = recentItem;
-        this._recentMonster = recentMonster;
+        this._recentMonsterName = recentMonsterName;
         this._spawnedItems.Clear();
         this._spawnedMonsters.Clear();
         this._itemSpawnPriorities.Clear();
@@ -120,9 +121,9 @@ public class LocalizationPredictor
                 break;
             case LocalizationFilterType.MostRecentMonster:
                 str1 = "(Most Recent Monster)";
-                if (_recentMonster != null)
+                if (_recentMonsterName != null && Localization.Has(_recentMonsterName.Key))
                 {
-                    insert.CompressedStringData = _recentMonster.Name.Key;
+                    insert.CompressedStringData = _recentMonsterName.Key;
                     str1 = MoM_LocalizationPacket.DecompressInsert(insert);
                 }
 
