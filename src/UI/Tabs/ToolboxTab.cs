@@ -8,5 +8,9 @@ public abstract class ToolboxTab(string name)
     {
     }
 
+    public virtual void OnScenarioShutdown()
+    {
+    }
+
     public abstract void Render();
 }

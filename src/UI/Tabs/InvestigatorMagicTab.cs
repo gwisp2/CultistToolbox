@@ -43,7 +43,7 @@ public class InvestigatorMagicTab() : ToolboxTab("Investigators")
 
     public override void Render()
     {
-        if (!GameData.IsInitialized) return;
+        if (!HookScenarioLoadUnload.ScenarioLoaded) return;
 
         if (_scenarioHasGetInvestigatorId && GameData.ScenarioVariant == _scenarioVariant)
         {

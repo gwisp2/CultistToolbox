@@ -5,6 +5,7 @@ namespace CultistToolbox.UI;
 
 public static class Common
 {
+    public static readonly Lazy<GUIStyle> SmallLabelStyle = new(CreateSmallLabelStyle);
     public static readonly Lazy<GUIStyle> LabelStyle = new(CreateLabelStyle);
     public static readonly Lazy<GUIStyle> HighlightLabelStyle = new(CreateHighlightLabelStyle);
     public static readonly Lazy<GUIStyle> HighlightOnHoverLabelStyle = new(CreateHighlightOnHoverLabelStyle);
@@ -27,9 +28,16 @@ public static class Common
         return style;
     }
 
-    private static GUIStyle CreateLabelStyle()
+    private static GUIStyle CreateSmallLabelStyle()
     {
         var style = new GUIStyle(GUI.skin.label);
+        style.font = IconFontLocator.IconFont;
+        return style;
+    }
+
+    private static GUIStyle CreateLabelStyle()
+    {
+        var style = CreateSmallLabelStyle();
         style.font = IconFontLocator.IconFont;
         style.fontSize = 30;
         return style;

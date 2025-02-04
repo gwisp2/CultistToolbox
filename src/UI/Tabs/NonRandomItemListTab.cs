@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using CultistToolbox.FsmTools;
+using CultistToolbox.Patch;
 using FFG.MoM;
 using HutongGames.PlayMaker;
 using UnityEngine;
@@ -22,6 +23,11 @@ public class NonRandomItemListTab() : ToolboxTab("Items")
             .Select(p => p.Item)
             .Distinct()
             .ToList();
+    }
+
+    public override void OnScenarioShutdown()
+    {
+        if (!HookScenarioLoadUnload.ScenarioLoaded) return;
     }
 
     public override void Render()

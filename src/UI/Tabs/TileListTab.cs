@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CultistToolbox.Patch;
 using FFG.MoM;
 using UnityEngine;
 
@@ -68,9 +69,15 @@ public class TileListTab() : ToolboxTab("Tiles")
             .ToList();
     }
 
+    public override void OnScenarioShutdown()
+    {
+        _tiles = [];
+    }
+
     public override void Render()
     {
-        if (!GameData.IsInitialized) return;
+        if (!HookScenarioLoadUnload.ScenarioLoaded) return;
+
         _scrollPosition = GUILayout.BeginScrollView(_scrollPosition);
         foreach (var tile in _tiles)
         {

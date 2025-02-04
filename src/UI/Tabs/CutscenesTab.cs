@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using CultistToolbox.Patch;
 using FFG.MoM;
 using FFG.MoM.Actions;
 using UnityEngine;
@@ -50,8 +51,15 @@ public class CutscenesTab() : ToolboxTab("Cutscenes")
             .ToList();
     }
 
+    public override void OnScenarioShutdown()
+    {
+        _cutscenesInScenario = [];
+    }
+
     public override void Render()
     {
+        if (!HookScenarioLoadUnload.ScenarioLoaded) return;
+
         // Show cutscenes used in this scenario
         GUILayout.Label("Cutscenes in this scenario");
         foreach (var cutsceneInfo in _cutscenesInScenario)

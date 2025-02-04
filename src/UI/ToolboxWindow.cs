@@ -22,10 +22,12 @@ public class ToolboxWindow : MonoBehaviour
             new InvestigatorMagicTab(),
             new TileListTab(),
             new CutscenesTab(),
+            new MythosTab()
         ];
         _selectedTab = _tabs[0];
         _window = new WindowController(5953, "Cultist Toolbox", DrawToolbox, new Rect(10, 10, 800, 600));
-        HookScenarioLoadingCompletePatch.ScenarioLoadingComplete += OnScenarioLoadingComplete;
+        HookScenarioLoadUnload.ScenarioLoadingComplete += OnScenarioLoadingComplete;
+        HookScenarioLoadUnload.ScenarioShutdown += OnScenarioShutdown;
     }
 
     private void OnGUI()
@@ -44,22 +46,7 @@ public class ToolboxWindow : MonoBehaviour
     private void DrawToolbox()
     {
         // Draw tab chooser buttons
-        GUILayout.BeginHorizontal();
-        try
-        {
-            foreach (var tab in _tabs)
-            {
-                if (GUILayout.Button(tab.Name,
-                        _selectedTab == tab ? Common.HighlightButtonStyle.Value : Common.ButtonStyle.Value))
-                {
-                    _selectedTab = tab;
-                }
-            }
-        }
-        finally
-        {
-            GUILayout.EndHorizontal();
-        }
+        DrawToolboxHeader();
 
         // Draw tab content
         if (_selectedTab != null)
@@ -68,11 +55,36 @@ public class ToolboxWindow : MonoBehaviour
         }
     }
 
+    private void DrawToolboxHeader()
+    {
+        GUILayout.BeginVertical("", GUI.skin.box);
+        GUILayout.BeginHorizontal();
+        foreach (var tab in _tabs)
+        {
+            if (GUILayout.Button(tab.Name,
+                    _selectedTab == tab ? Common.HighlightButtonStyle.Value : Common.ButtonStyle.Value))
+            {
+                _selectedTab = tab;
+            }
+        }
+
+        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
+    }
+
     private void OnScenarioLoadingComplete()
     {
         foreach (var toolboxTab in _tabs)
         {
             toolboxTab.OnScenarioLoaded();
+        }
+    }
+
+    private void OnScenarioShutdown()
+    {
+        foreach (var toolboxTab in _tabs)
+        {
+            toolboxTab.OnScenarioShutdown();
         }
     }
 }
