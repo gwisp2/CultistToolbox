@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using FFG.MoM;
+using HarmonyLib;
 using HutongGames.PlayMaker;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,6 +10,18 @@ namespace CultistToolbox;
 
 public static class Utilities
 {
+    public static string GetProductIconsForScenarioVariant(ScenarioVariant variant)
+    {
+        string baseIcon = "\uf209";
+        string icons = variant.RequiredAdditionalProducts.Select(GetProductIcons).Join(delimiter: "");
+        if (!icons.Contains(baseIcon))
+        {
+            icons = baseIcon + icons;
+        }
+
+        return icons;
+    }
+
     public static void Shuffle<T>(IList<T> list)
     {
         int n = list.Count;

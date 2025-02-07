@@ -52,15 +52,8 @@ public class AddVariantChooser
             if (variant != null &&
                 UserCollectionManager.IsAllOwned(variant.RequiredAdditionalProducts, true))
             {
-                string baseIcon = "\uf209";
-                string icons = variant.RequiredAdditionalProducts.Select(Utilities.GetProductIcons).Join(delimiter: "");
-                if (!icons.Contains(baseIcon))
-                {
-                    icons = baseIcon + icons;
-                }
-
                 objectList.Add(variant);
-                stringList.Add(variant.name + " (" + icons + ")");
+                stringList.Add(variant.name + " (" + Utilities.GetProductIconsForScenarioVariant(variant) + ")");
             }
         }
 

@@ -16,12 +16,6 @@ public class AdvancedUserCollectionProduct(
 
     public ProductModel ProductModel => MoMDBManager.DB.GetProductByCode(ProductCode);
 
-    public bool IsShared
-    {
-        get => AllPresent(ItemComponentTypes.IsShared);
-        set => Set(ItemComponentTypes.IsShared, value);
-    }
-
     public bool HasInvestigators
     {
         get => AllPresent(ItemComponentTypes.Investigators);

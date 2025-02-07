@@ -54,9 +54,22 @@ public class AdvancedCollectionManagerUi
 
     private void DrawEffectiveCollectionImpl()
     {
+        // Form a note about restricted components by ScenarioRestrictedComponentTypes
+        var restrictedComponentTypesNote = "";
+        if (Plugin.ConfigScenarioRestrictedComponentTypes.Value != 0)
+        {
+            var variant = CurrentScenarioVariantPatch.CurrentScenarioVariant;
+            var requiredProductIcons = Utilities.GetProductIconsForScenarioVariant(variant);
+            var restrictedComponentTypes = Plugin.ConfigScenarioRestrictedComponentTypes.Value;
+            var componentTypesStr = restrictedComponentTypes.ToCommaSeparatedString();
+            restrictedComponentTypesNote =
+                $" Due to ScenarioRestrictedComponentTypes the following components are taken from {requiredProductIcons} only: {componentTypesStr}";
+        }
+
         GUILayout.BeginVertical();
         GUILayout.Label(
-            "The following components are enabled in this scenario. This is affected by LimitAvailableItems.");
+            $"The following components are enabled in this scenario.{restrictedComponentTypesNote}",
+            Common.CreateSmallLabelStyle());
         var effectiveCollection = AdvancedCollectionFacade.GetEffectiveCollectionForCurrentScenario();
         foreach (var item in effectiveCollection.Items)
         {
@@ -103,31 +116,52 @@ public class AdvancedCollectionManagerUi
             : MoMDBManager.DB.MythosEvents.Count(e =>
                 e.RequiredProducts == null || !e.RequiredProducts.Any() ||
                 (e.RequiredProducts != null && e.RequiredProducts.Contains(product.ProductModel)));
+
+        bool hasInvestigators = product.HasInvestigators;
+        bool hasItems = product.HasItems;
+        bool hasMonsters = product.HasMonsters;
+        bool hasMythos = product.HasMythosEvents;
+        bool hasTiles = product.HasTiles;
+
         GUILayout.BeginHorizontal();
-        bool hasInvestigators = GUILayout.Toggle(product.HasInvestigators, $"Investigators ({nInvestigators})",
-            _toggleStyles.Value[styleIndex]);
-        bool hasItems = GUILayout.Toggle(product.HasItems, $"Items ({nItems})", _toggleStyles.Value[styleIndex]);
-        bool hasMonsters =
-            GUILayout.Toggle(product.HasMonsters, $"Monsters ({nMonsters})", _toggleStyles.Value[styleIndex]);
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal();
-        bool hasMythos = GUILayout.Toggle(product.HasMythosEvents, $"Mythos events ({nMythos})",
-            _toggleStyles.Value[styleIndex]);
-        bool hasTiles = GUILayout.Toggle(product.HasTiles, $"Tiles ({nTiles})", _toggleStyles.Value[styleIndex]);
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal();
-        bool isShared = GUILayout.Toggle(product.IsShared, $"Shared with other table");
-        GUILayout.EndHorizontal();
-        if (editable)
+        if (editable || hasInvestigators)
         {
-            product.HasInvestigators = hasInvestigators;
-            product.HasItems = hasItems;
-            product.HasMonsters = hasMonsters;
-            product.HasMythosEvents = hasMythos;
-            product.HasTiles = hasTiles;
+            hasInvestigators = GUILayout.Toggle(product.HasInvestigators, $"Investigators ({nInvestigators})",
+                _toggleStyles.Value[styleIndex]);
         }
 
-        product.IsShared = isShared;
+        if (editable || hasItems)
+        {
+            hasItems = GUILayout.Toggle(product.HasItems, $"Items ({nItems})", _toggleStyles.Value[styleIndex]);
+        }
+
+        if (editable || hasMonsters)
+        {
+            hasMonsters =
+                GUILayout.Toggle(product.HasMonsters, $"Monsters ({nMonsters})", _toggleStyles.Value[styleIndex]);
+        }
+
+        GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal();
+        if (editable || hasMythos)
+        {
+            hasMythos = GUILayout.Toggle(product.HasMythosEvents, $"Mythos events ({nMythos})",
+                _toggleStyles.Value[styleIndex]);
+        }
+
+        if (editable || hasTiles)
+        {
+            hasTiles = GUILayout.Toggle(product.HasTiles, $"Tiles ({nTiles})", _toggleStyles.Value[styleIndex]);
+        }
+
+        GUILayout.EndHorizontal();
+
+        if (!editable) return;
+        product.HasInvestigators = hasInvestigators;
+        product.HasItems = hasItems;
+        product.HasMonsters = hasMonsters;
+        product.HasMythosEvents = hasMythos;
+        product.HasTiles = hasTiles;
     }
 
     private static int GetStyleIndex(AdvancedUserCollectionProduct product)

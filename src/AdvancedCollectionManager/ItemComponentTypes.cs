@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
+using CultistToolbox.FsmExport;
+using HarmonyLib;
 
 namespace CultistToolbox.AdvancedCollectionManager;
 
@@ -14,7 +16,6 @@ public enum ItemComponentTypes
     Monsters = 4,
     MythosEvents = 8,
     Tiles = 16,
-    IsShared = 32,
     All = 31
 }
 
@@ -33,11 +34,15 @@ public static class ItemComponentTypesExtensions
         { ItemComponentTypes.Monsters, 'm' },
         { ItemComponentTypes.MythosEvents, 'M' },
         { ItemComponentTypes.Tiles, 't' },
-        { ItemComponentTypes.IsShared, '/' },
     };
 
     private static readonly Dictionary<char, ItemComponentTypes> CharToEnumMap =
         EnumToCharMap.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+
+    public static string ToCommaSeparatedString(this ItemComponentTypes value)
+    {
+        return ActionE.GetFlagNames(value).Join(delimiter: ", ");
+    }
 
     public static void RegisterTomlConverter()
     {

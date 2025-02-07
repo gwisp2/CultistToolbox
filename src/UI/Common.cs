@@ -28,7 +28,7 @@ public static class Common
         return style;
     }
 
-    private static GUIStyle CreateSmallLabelStyle()
+    public static GUIStyle CreateSmallLabelStyle()
     {
         var style = new GUIStyle(GUI.skin.label);
         style.font = IconFontLocator.IconFont;
