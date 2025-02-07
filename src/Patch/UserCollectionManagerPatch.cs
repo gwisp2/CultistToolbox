@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using FFG.Common;
 using FFG.MoM;
 using HarmonyLib;
@@ -24,6 +25,14 @@ public class UserCollectionManagerPatch
         AvailableInvestigatorsRef =
             AccessTools.FieldRefAccess<InvestigatorSelectionManager, IEnumerable<InvestigatorModel>>(
                 "_availableInvestigators");
+
+    private static readonly AccessTools.FieldRef<InvestigatorSelectionManager, List<InvestigatorSelectionSlot>>
+        SelectionInvestigatorsRef =
+            AccessTools.FieldRefAccess<InvestigatorSelectionManager, List<InvestigatorSelectionSlot>>(
+                "_selectionInvestigators");
+
+    private static readonly MethodInfo OnSelectionSlotSelectedMethodInfo = typeof(InvestigatorSelectionManager)
+        .GetMethod("OnSelectionSlotSelected", BindingFlags.Instance | BindingFlags.NonPublic);
 
     [HarmonyPatch("LoadUserCollection")]
     [HarmonyPrefix]
@@ -157,11 +166,26 @@ public class UserCollectionManagerPatch
         {
             var investigatorSelectionManager = setupViewController.PanelInvestigatorSelect;
             if (investigatorSelectionManager == null) continue;
-            var oldInvestigators = AvailableInvestigatorsRef(investigatorSelectionManager);
-            var newInvestigators = MoMDBManager.DB.GetAvailableInvestigators();
-            if (!oldInvestigators.SequenceEqual(newInvestigators))
+            var oldInvestigators = AvailableInvestigatorsRef(investigatorSelectionManager).ToList();
+            var newInvestigators = MoMDBManager.DB.GetAvailableInvestigators().ToList();
+            if (oldInvestigators.SequenceEqual(newInvestigators)) break;
+
+            // Save the current list of investigators
+            var remainingInvestigators = investigatorSelectionManager.PartyInvestigators
+                .Where(s => s.isSelected)
+                .Select(s => s.myInvestigator.Model)
+                .Where(i => newInvestigators.Contains(i))
+                .ToList();
+            // Reinitialize selection
+            setupViewController.LoadInvestigators();
+            // Restore investigator list
+            var investigatorSelectionSlots = remainingInvestigators
+                .Select(remainingInvestigator => SelectionInvestigatorsRef(investigatorSelectionManager)
+                    .Find(s => s.Model == remainingInvestigator))
+                .Where(investigatorSelectionSlot => investigatorSelectionSlot != null);
+            foreach (var investigatorSelectionSlot in investigatorSelectionSlots)
             {
-                setupViewController.LoadInvestigators();
+                OnSelectionSlotSelectedMethodInfo.Invoke(investigatorSelectionManager, [investigatorSelectionSlot]);
             }
         }
     }
