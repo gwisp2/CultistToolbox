@@ -1,4 +1,6 @@
-﻿namespace CultistToolbox.AdvancedCollectionManager;
+﻿using System.Linq;
+
+namespace CultistToolbox.AdvancedCollectionManager;
 
 public class AdvancedUserCollectionProduct(
     string productCode,
@@ -15,6 +17,40 @@ public class AdvancedUserCollectionProduct(
     }
 
     public ProductModel ProductModel => MoMDBManager.DB.GetProductByCode(ProductCode);
+
+    public int InvestigatorCount => ProductModel.Investigators.Count;
+    public bool CanHaveInvestigators => InvestigatorCount > 0;
+    public int ItemCount => ProductModel.Items.Count;
+    public bool CanHaveItems => ItemCount > 0;
+    public int MonsterCount => ProductModel.Monsters.Count;
+    public bool CanHaveMonsters => MonsterCount > 0;
+    public int TileCount => ProductModel.TileQuantity;
+    public bool CanHaveTiles => TileCount > 0;
+
+    public int MythosCount => ProductModel.CanToggle
+        ? MoMDBManager.DB.MythosEvents.Count(e =>
+            e.RequiredProducts != null && e.RequiredProducts.Contains(ProductModel))
+        : MoMDBManager.DB.MythosEvents.Count(e =>
+            e.RequiredProducts == null || !e.RequiredProducts.Any() ||
+            (e.RequiredProducts != null && e.RequiredProducts.Contains(ProductModel)));
+
+    public bool CanHaveMythosEvents => MythosCount > 0;
+
+    private ItemComponentTypes _possibleComponentTypesCached = 0;
+
+    private ItemComponentTypes PossibleComponentTypes
+    {
+        get
+        {
+            if (_possibleComponentTypesCached != 0) return _possibleComponentTypesCached;
+            _possibleComponentTypesCached = (CanHaveInvestigators ? ItemComponentTypes.Investigators : 0) |
+                                            (CanHaveItems ? ItemComponentTypes.Items : 0) |
+                                            (CanHaveMonsters ? ItemComponentTypes.Monsters : 0) |
+                                            (CanHaveMythosEvents ? ItemComponentTypes.MythosEvents : 0) |
+                                            (CanHaveTiles ? ItemComponentTypes.Tiles : 0);
+            return _possibleComponentTypesCached;
+        }
+    }
 
     public bool HasInvestigators
     {
@@ -67,6 +103,8 @@ public class AdvancedUserCollectionProduct(
         {
             _presentComponents &= ~types;
         }
+
+        _presentComponents &= PossibleComponentTypes;
     }
 
     public void SetEverything(bool value)
@@ -75,7 +113,7 @@ public class AdvancedUserCollectionProduct(
     }
 
     public bool IsAnythingSelected => ((int)_presentComponents & (int)ItemComponentTypes.All) != 0;
-    public bool IsEverythingSelected => _presentComponents.HasFlag(ItemComponentTypes.All);
+    public bool IsEverythingSelected => _presentComponents.HasFlag(PossibleComponentTypes);
 
     public string SaveToString()
     {

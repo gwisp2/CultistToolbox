@@ -106,17 +106,6 @@ public class AdvancedCollectionManagerUi
             GUILayout.EndHorizontal();
         }
 
-        var nInvestigators = product.ProductModel.Investigators.Count;
-        var nItems = product.ProductModel.Items.Count;
-        var nMonsters = product.ProductModel.Monsters.Count;
-        var nTiles = product.ProductModel.TileQuantity;
-        var nMythos = product.ProductModel.CanToggle
-            ? MoMDBManager.DB.MythosEvents.Count(e =>
-                e.RequiredProducts != null && e.RequiredProducts.Contains(product.ProductModel))
-            : MoMDBManager.DB.MythosEvents.Count(e =>
-                e.RequiredProducts == null || !e.RequiredProducts.Any() ||
-                (e.RequiredProducts != null && e.RequiredProducts.Contains(product.ProductModel)));
-
         bool hasInvestigators = product.HasInvestigators;
         bool hasItems = product.HasItems;
         bool hasMonsters = product.HasMonsters;
@@ -124,34 +113,38 @@ public class AdvancedCollectionManagerUi
         bool hasTiles = product.HasTiles;
 
         GUILayout.BeginHorizontal();
-        if (editable || hasInvestigators)
+        if ((editable || hasInvestigators) && product.CanHaveInvestigators)
         {
-            hasInvestigators = GUILayout.Toggle(product.HasInvestigators, $"Investigators ({nInvestigators})",
+            hasInvestigators = GUILayout.Toggle(product.HasInvestigators,
+                $"Investigators ({product.InvestigatorCount})",
                 _toggleStyles.Value[styleIndex]);
         }
 
-        if (editable || hasItems)
+        if ((editable || hasItems) && product.CanHaveItems)
         {
-            hasItems = GUILayout.Toggle(product.HasItems, $"Items ({nItems})", _toggleStyles.Value[styleIndex]);
+            hasItems = GUILayout.Toggle(product.HasItems, $"Items ({product.ItemCount})",
+                _toggleStyles.Value[styleIndex]);
         }
 
-        if (editable || hasMonsters)
+        if ((editable || hasMonsters) && product.CanHaveMonsters)
         {
             hasMonsters =
-                GUILayout.Toggle(product.HasMonsters, $"Monsters ({nMonsters})", _toggleStyles.Value[styleIndex]);
+                GUILayout.Toggle(product.HasMonsters, $"Monsters ({product.MonsterCount})",
+                    _toggleStyles.Value[styleIndex]);
         }
 
         GUILayout.EndHorizontal();
         GUILayout.BeginHorizontal();
-        if (editable || hasMythos)
+        if ((editable || hasMythos) && product.CanHaveMythosEvents)
         {
-            hasMythos = GUILayout.Toggle(product.HasMythosEvents, $"Mythos events ({nMythos})",
+            hasMythos = GUILayout.Toggle(product.HasMythosEvents, $"Mythos events ({product.MythosCount})",
                 _toggleStyles.Value[styleIndex]);
         }
 
-        if (editable || hasTiles)
+        if ((editable || hasTiles) && product.CanHaveTiles)
         {
-            hasTiles = GUILayout.Toggle(product.HasTiles, $"Tiles ({nTiles})", _toggleStyles.Value[styleIndex]);
+            hasTiles = GUILayout.Toggle(product.HasTiles, $"Tiles ({product.TileCount})",
+                _toggleStyles.Value[styleIndex]);
         }
 
         GUILayout.EndHorizontal();
