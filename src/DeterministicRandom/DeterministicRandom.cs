@@ -44,8 +44,6 @@ public class DeterministicRandom
         ulong rangeSize = (ulong)(maxExclusive - minInclusive);
         var result = (int)(DeterministicallyAssignULong() % rangeSize) + minInclusive;
 
-        Plugin.Logger.LogDebug($"Deterministically assigned integer {result} using {ComputeHashInput()}");
-
         return result;
     }
 
@@ -63,7 +61,6 @@ public class DeterministicRandom
 
         IncrementCallIndex();
         double num1 = DeterministicallyAssignDouble(0, maxInclusive);
-        Plugin.Logger.LogDebug($"Deterministically assigned double {num1} using {ComputeHashInput()}");
         double num2 = 0.0f;
         int randomWeightedIndex = 0;
         foreach (float weight in weights)
@@ -85,8 +82,6 @@ public class DeterministicRandom
         }
 
         var selected = SortElementsByRandomPriority(collection)[0];
-        Plugin.Logger.LogDebug(
-            $"Random choice: {_salt}@{_callIndex}@{UniqueSalt.Of(selected)} with priority {DeterministicallyAssignULong(selected)}");
 
         return selected;
     }
