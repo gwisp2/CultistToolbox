@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using CultistToolbox.Patch;
 using HutongGames.PlayMaker;
 
 namespace CultistToolbox.DeterministicRandom;
@@ -24,10 +24,62 @@ public class DeterministicRandomFacade
         }
     }
 
-    private static readonly ConditionalWeakTable<IFsmStateAction, Context> Contexts = new();
-    private static Stack<Context> _contextStack = new();
-    private static Context _defaultContext = new();
+    private static string _seed;
+    private static Dictionary<string, Context> _contexts;
+    private static Stack<Context> _contextStack;
+    private static Context _defaultContext;
 
+    static DeterministicRandomFacade()
+    {
+        Reset();
+        HookScenarioLoadUnload.ScenarioShutdown += Reset;
+    }
+
+    private static void Reset()
+    {
+        _contexts = new Dictionary<string, Context>();
+        _defaultContext = new();
+        _seed = GenerateRandomSeed();
+        _defaultContext.DeterministicRandom.Reset(_seed);
+        _contextStack = new();
+    }
+
+    private static string GenerateRandomSeed()
+    {
+        const int length = 6;
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new Random();
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    public static DeterministicRandomSave Save()
+    {
+        List<DeterministicRandomSave.ContextSave> savedContexts = _contexts
+            .Select(kv => new DeterministicRandomSave.ContextSave()
+                { ActionId = kv.Key, ActionCallIndex = kv.Value.ActionCallIndex })
+            .Where(s => s.ActionCallIndex != 0)
+            .ToList();
+        return new DeterministicRandomSave()
+        {
+            Seed = _seed,
+            ActionContexts = savedContexts,
+            DefaultContextCallIndex = _defaultContext.DeterministicRandom.CallIndex
+        };
+    }
+
+    public static void Load(DeterministicRandomSave save)
+    {
+        Reset();
+        if (save == null) return;
+        _seed = save.Seed;
+        _defaultContext.DeterministicRandom.Reset(_seed);
+        _defaultContext.DeterministicRandom.CallIndex = save.DefaultContextCallIndex;
+        foreach (var savedActionContext in save.ActionContexts)
+        {
+            GetContext(savedActionContext.ActionId).ActionCallIndex = savedActionContext.ActionCallIndex;
+        }
+    }
 
     public static IDisposable OpenContext(IFsmStateAction action)
     {
@@ -41,9 +93,9 @@ public class DeterministicRandomFacade
         return new ContextDisposer(action);
     }
 
-    private static void OpenContext(IFsmStateAction action, bool simulating = false)
+    private static void OpenContext(IFsmStateAction action, bool simulating)
     {
-        var context = Contexts.GetOrCreateValue(action);
+        var context = GetContext(action);
         if (!context.Closed)
         {
             throw new InvalidOperationException("Context is already open fcr this action");
@@ -51,13 +103,14 @@ public class DeterministicRandomFacade
 
         context.Closed = false;
         context.Simulating = simulating;
-        context.DeterministicRandom.Reset(RuntimeHelpers.GetHashCode(action) + "@" + context.ActionCallIndex);
+        var actionId = UniqueSalt.Of(action);
+        context.DeterministicRandom.Reset($"{_seed}@{actionId}@{context.ActionCallIndex}");
         _contextStack.Push(context);
     }
 
     public static void CloseContext(IFsmStateAction action)
     {
-        var context = Contexts.GetOrCreateValue(action);
+        var context = GetContext(action);
         if (context.Closed)
         {
             throw new InvalidOperationException("Context is already closed fcr this action");
@@ -69,12 +122,28 @@ public class DeterministicRandomFacade
         }
 
         context.Closed = true;
-        if (!context.Simulating)
+        if (!context.Simulating && context.DeterministicRandom.WasCalledSinceReset())
         {
             context.ActionCallIndex++;
         }
 
         _contextStack.Pop();
+    }
+
+    private static Context GetContext(IFsmStateAction action)
+    {
+        return GetContext(UniqueSalt.Of(action));
+    }
+
+    private static Context GetContext(string actionId)
+    {
+        if (_contexts.TryGetValue(actionId, out var context))
+        {
+            return context;
+        }
+
+        _contexts[actionId] = context = new();
+        return context;
     }
 
     private static Context CurrentContext()

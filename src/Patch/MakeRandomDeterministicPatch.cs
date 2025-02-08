@@ -84,5 +84,6 @@ public class MakeRandomDeterministicPatch
         yield return AccessTools.DeclaredMethod(typeof(RandomEvent), "OnEnter");
         yield return AccessTools.DeclaredMethod(typeof(RandomEvent), "GetRandomEvent");
         yield return AccessTools.DeclaredMethod(typeof(SendRandomEvent), "OnEnter");
+        yield return AccessTools.DeclaredMethod(typeof(MythosEventDeckManager), "PickEvent");
     }
 }
