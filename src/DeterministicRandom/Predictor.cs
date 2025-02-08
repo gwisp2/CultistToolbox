@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using FFG.MoM;
 using FFG.MoM.Actions;
 using HutongGames.PlayMaker;
@@ -8,20 +7,6 @@ namespace CultistToolbox.DeterministicRandom;
 
 public static class Predictor
 {
-    public static List<ItemSpawnPriorities> PredictSpawnedItems(IFsmStateAction action)
-    {
-        using (DeterministicRandomFacade.OpenContextForSimulation(action))
-        {
-            if (action is SpawnItem spawnItem)
-            {
-                var priorities = PredictSpawnItemPriorities(spawnItem);
-                return priorities != null ? [priorities] : [];
-            }
-
-            return PredictMessage(action)?.ItemSpawnPriorities ?? [];
-        }
-    }
-
     public static string PredictDisplayedText(IFsmStateAction action)
     {
         using (DeterministicRandomFacade.OpenContextForSimulation(action))
@@ -30,7 +15,7 @@ public static class Predictor
         }
     }
 
-    private static LocalizationPredictor PredictMessage(IFsmStateAction action)
+    public static LocalizationPredictor PredictMessage(IFsmStateAction action)
     {
         var packet = ExtractMessage(action);
         if (packet == null) return null;
