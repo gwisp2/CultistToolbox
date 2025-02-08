@@ -16,6 +16,7 @@ public class LocalizationPredictor
     private ItemModel _recentItem = null;
     private LocalizationPacket _recentMonsterName = null;
 
+    private bool _hasUntranslatableKeys = false;
     private string _localizedText = null;
     private List<ItemSpawnPriorities> _itemSpawnPriorities = new();
     private List<ItemModel> _spawnedItems = new();
@@ -27,6 +28,7 @@ public class LocalizationPredictor
     public List<ItemModel> SpawnedItems => _spawnedItems.ToList();
     public List<MonsterModel> SpawnedMonsters => _spawnedMonsters.ToList();
     public string LocalizedText => _localizedText;
+    public bool HasUntranslatableKeys => _hasUntranslatableKeys;
 
     public LocalizationPredictor(MoM_LocalizationPacket packet)
     {
@@ -44,9 +46,9 @@ public class LocalizationPredictor
         this._spawnedMonsters.Clear();
         this._itemSpawnPriorities.Clear();
 
-        if (_inserts.Count == 0 || _inserts.Count > 5)
+        if (_inserts.Count is 0 or > 5)
         {
-            _localizedText = Localization.Get(_packet.Key);
+            _localizedText = LocalizeKey(_packet.Key);
             return _localizedText;
         }
 
@@ -73,7 +75,7 @@ public class LocalizationPredictor
                     key = this._packet.Key + "_ALT";
             }
 
-            _localizedText = string.Format(Localization.Get(key), strArray);
+            _localizedText = string.Format(LocalizeKey(key), strArray);
             return _localizedText;
         }
         catch (FormatException ex)
@@ -82,6 +84,17 @@ public class LocalizationPredictor
             _localizedText = null;
             return null;
         }
+    }
+
+    private string LocalizeKey(string key)
+    {
+        if (!Localization.Has(key))
+        {
+            _hasUntranslatableKeys = true;
+            return key;
+        }
+
+        return Localization.Get(key);
     }
 
     private string ResolveInsert(MoM_LocalizationPacket.PacketInsert insert)
@@ -93,7 +106,7 @@ public class LocalizationPredictor
             case LocalizationFilterType.RandomInvestigator:
                 str1 = "(Random Investigator)";
                 InvestigatorModel investigatorModel =
-                    _investigatorPool is not { Count: > 0 }
+                    !_investigatorPool.Any()
                         ? MoM_InvestigatorManager.GetRandomInvestigator(true)
                         : DeterministicRandomFacade.GetRandomElementAndRemove(_investigatorPool);
                 if (investigatorModel != null)
