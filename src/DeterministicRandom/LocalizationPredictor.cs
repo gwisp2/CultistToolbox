@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using FFG.MoM;
+using HarmonyLib;
 
 namespace CultistToolbox.DeterministicRandom;
 
@@ -45,6 +46,7 @@ public class LocalizationPredictor
         this._spawnedItems.Clear();
         this._spawnedMonsters.Clear();
         this._itemSpawnPriorities.Clear();
+        _investigatorPool = null;
 
         if (_inserts.Count is 0 or > 5)
         {
@@ -57,7 +59,6 @@ public class LocalizationPredictor
         {
             string key = this._packet.Key;
             string[] strArray = new string[this._inserts.Count];
-            _investigatorPool = null;
             _tilePool = MoM_MapTileManager.GetCurrentTilesCopy();
             _roomPool = MoM_RoomManager.GetAllRoomsCopy(true);
             _itemPool = MoM_ItemManager.GetAllValidItems().ToList();
@@ -106,8 +107,8 @@ public class LocalizationPredictor
             case LocalizationFilterType.RandomInvestigator:
                 str1 = "(Random Investigator)";
                 InvestigatorModel investigatorModel =
-                    !_investigatorPool.Any()
-                        ? MoM_InvestigatorManager.GetRandomInvestigator(true)
+                    _investigatorPool == null || !_investigatorPool.Any()
+                        ? GetRandomWeightedInvestigator()
                         : DeterministicRandomFacade.GetRandomElementAndRemove(_investigatorPool);
                 if (investigatorModel != null)
                 {
@@ -237,6 +238,27 @@ public class LocalizationPredictor
         }
 
         return str1;
+    }
+
+    private static InvestigatorModel GetRandomWeightedInvestigator()
+    {
+        // Save weights
+        var savedWeights = AccessTools
+            .StaticFieldRefAccess<MoM_InvestigatorManager, List<float>>("RandomSelectionWeights")?.ToList();
+        try
+        {
+            var randomWeightedInvestigator = MoM_InvestigatorManager.GetRandomInvestigator(true);
+            return randomWeightedInvestigator;
+        }
+        finally
+        {
+            // Restore weights because they may be changed
+            if (savedWeights != null)
+            {
+                AccessTools.StaticFieldRefAccess<MoM_InvestigatorManager, List<float>>("RandomSelectionWeights") =
+                    savedWeights;
+            }
+        }
     }
 
     private string ResolveInsertWithRandomItem(MoM_LocalizationPacket.PacketInsert insert)
