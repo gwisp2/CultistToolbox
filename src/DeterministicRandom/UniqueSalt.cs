@@ -44,6 +44,11 @@ public static class UniqueSalt
             return eventModel.Id + "_" + eventModel.Name;
         }
 
+        if (value is InvestigatorModel investigatorModel)
+        {
+            return investigatorModel.Id + "_" + investigatorModel.Name.Key;
+        }
+
         Plugin.Logger.LogWarning("UniqueSalt.of: unknown type:" + value.GetType());
 
         return RuntimeHelpers.GetHashCode(value).ToString();
