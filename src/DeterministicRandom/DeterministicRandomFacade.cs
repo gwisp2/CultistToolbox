@@ -25,7 +25,8 @@ public class DeterministicRandomFacade
     }
 
     private static string _seed;
-    private static Dictionary<string, Context> _contexts;
+    private static List<DeterministicRandomSave.ContextSave> _contextSaves;
+    private static Dictionary<IFsmStateAction, Context> _contexts;
     private static Stack<Context> _contextStack;
     private static Context _defaultContext;
 
@@ -37,7 +38,8 @@ public class DeterministicRandomFacade
 
     private static void Reset()
     {
-        _contexts = new Dictionary<string, Context>();
+        _contextSaves = [];
+        _contexts = new Dictionary<IFsmStateAction, Context>();
         _defaultContext = new();
         _seed = GenerateRandomSeed();
         _defaultContext.DeterministicRandom.Reset(_seed);
@@ -55,15 +57,15 @@ public class DeterministicRandomFacade
 
     public static DeterministicRandomSave Save()
     {
-        List<DeterministicRandomSave.ContextSave> savedContexts = _contexts
+        List<DeterministicRandomSave.ContextSave> newSavedContexts = _contexts
             .Select(kv => new DeterministicRandomSave.ContextSave()
-                { ActionId = kv.Key, ActionCallIndex = kv.Value.ActionCallIndex })
+                { ActionId = UniqueSalt.Of(kv.Key), ActionCallIndex = kv.Value.ActionCallIndex })
             .Where(s => s.ActionCallIndex != 0)
             .ToList();
         return new DeterministicRandomSave()
         {
             Seed = _seed,
-            ActionContexts = savedContexts,
+            ActionContexts = [.._contextSaves, ..newSavedContexts],
             DefaultContextCallIndex = _defaultContext.DeterministicRandom.CallIndex
         };
     }
@@ -75,10 +77,7 @@ public class DeterministicRandomFacade
         _seed = save.Seed;
         _defaultContext.DeterministicRandom.Reset(_seed);
         _defaultContext.DeterministicRandom.CallIndex = save.DefaultContextCallIndex;
-        foreach (var savedActionContext in save.ActionContexts)
-        {
-            GetContext(savedActionContext.ActionId).ActionCallIndex = savedActionContext.ActionCallIndex;
-        }
+        _contextSaves = save.ActionContexts; // used in GetContext()
     }
 
     public static IDisposable OpenContext(IFsmStateAction action)
@@ -132,17 +131,22 @@ public class DeterministicRandomFacade
 
     private static Context GetContext(IFsmStateAction action)
     {
-        return GetContext(UniqueSalt.Of(action));
-    }
-
-    private static Context GetContext(string actionId)
-    {
-        if (_contexts.TryGetValue(actionId, out var context))
+        if (_contexts.TryGetValue(action, out var context))
         {
             return context;
         }
 
-        _contexts[actionId] = context = new();
+        _contexts[action] = context = new();
+
+        // Apply context from save (if present)
+        var actionId = UniqueSalt.Of(action);
+        var savedContext = _contextSaves.Find(c => c.ActionId == actionId);
+        if (savedContext != null)
+        {
+            context.ActionCallIndex = savedContext.ActionCallIndex;
+            _contextSaves.Remove(savedContext); // so it won't be saved again 
+        }
+
         return context;
     }
 
